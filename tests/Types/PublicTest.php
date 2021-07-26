@@ -55,14 +55,14 @@ class PublicTest extends TestCase
         $this->v4sk = AsymmetricSecretKey::generate(new Version4());
         $this->v4pk = $this->v4sk->getPublicKey();
         
-        $this->rsaPublicKey = '-----BEGIN PUBLIC KEY-----' . PHP_EOL .
-            'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyaTgTt53ph3p5GHgwoGW' . PHP_EOL .
-            'wz5hRfWXSQA08NCOwe0FEgALWos9GCjNFCd723nCHxBtN1qd74MSh/uN88JPIbwx' . PHP_EOL .
-            'KheDp4kxo4YMN5trPaF0e9G6Bj1N02HnanxFLW+gmLbgYO/SZYfWF/M8yLBcu5Y1' . PHP_EOL .
-            'Ot0ZxDDDXS9wIQTtBE0ne3YbxgZJAZTU5XqyQ1DxdzYyC5lF6yBaR5UQtCYTnXAA' . PHP_EOL .
-            'pVRuUI2Sd6L1E2vl9bSBumZ5IpNxkRnAwIMjeTJB/0AIELh0mE5vwdihOCbdV6al' . PHP_EOL .
-            'UyhKC1+1w/FW6HWcp/JG1kKC8DPIidZ78Bbqv9YFzkAbNni5eSBOsXVBKG78Zsc8' . PHP_EOL .
-            'owIDAQAB' . PHP_EOL .
+        $this->rsaPublicKey = '-----BEGIN PUBLIC KEY-----' . "\n" .
+            'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyaTgTt53ph3p5GHgwoGW' . "\n" .
+            'wz5hRfWXSQA08NCOwe0FEgALWos9GCjNFCd723nCHxBtN1qd74MSh/uN88JPIbwx' . "\n" .
+            'KheDp4kxo4YMN5trPaF0e9G6Bj1N02HnanxFLW+gmLbgYO/SZYfWF/M8yLBcu5Y1' . "\n" .
+            'Ot0ZxDDDXS9wIQTtBE0ne3YbxgZJAZTU5XqyQ1DxdzYyC5lF6yBaR5UQtCYTnXAA' . "\n" .
+            'pVRuUI2Sd6L1E2vl9bSBumZ5IpNxkRnAwIMjeTJB/0AIELh0mE5vwdihOCbdV6al' . "\n" .
+            'UyhKC1+1w/FW6HWcp/JG1kKC8DPIidZ78Bbqv9YFzkAbNni5eSBOsXVBKG78Zsc8' . "\n" .
+            'owIDAQAB' . "\n" .
             '-----END PUBLIC KEY-----';
     }
 
