@@ -51,7 +51,7 @@ class PublicType implements PaserkTypeInterface
         $raw = Base64UrlSafe::decode($encoded);
         $b64 = Base64::encode($raw);
         $pem = '-----BEGIN PUBLIC KEY-----' . "\n" .
-            chunk_split($b64, 64) .
+            chunk_split($b64, 64, "\n") .
             '-----END PUBLIC KEY-----';
         return new AsymmetricPublicKey($pem, new Version1());
     }

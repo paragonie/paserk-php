@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ParagonIE\Paserk\Tests\Types;
 
 use ParagonIE\Paserk\PaserkException;
+use ParagonIE\Paserk\Util;
 use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
 use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 use ParagonIE\Paseto\Protocol\{
@@ -54,7 +55,6 @@ class SecretTest extends TestCase
         $this->v4sk = AsymmetricSecretKey::generate(new Version4());
         $this->v4pk = $this->v4sk->getPublicKey();
     }
-
 
     public function testEncodeDecode()
     {

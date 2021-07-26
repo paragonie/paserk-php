@@ -51,7 +51,7 @@ class SecretType implements PaserkTypeInterface
         $raw = Base64UrlSafe::decode($encoded);
         $b64 = Base64::encode($raw);
         $pem = '-----BEGIN RSA PRIVATE KEY-----' . "\n" .
-            chunk_split($b64, 64) .
+            chunk_split($b64, 64, "\n") .
             '-----END RSA PRIVATE KEY-----';
         return new AsymmetricSecretKey($pem, new Version1());
     }
