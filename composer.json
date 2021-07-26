@@ -1,0 +1,40 @@
+{
+  "name": "paragonie/paserk",
+  "description": "PHP implementation of PASERK (Platform Agnostic SERialized Keys), a PASETO extension.",
+  "license": "ISC",
+  "type": "library",
+  "authors": [
+    {
+      "name": "Paragon Initiative Enterprises",
+      "email": "security@paragonie.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "ParagonIE\\Paserk\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "ParagonIE\\Paserk\\Tests\\": "tests/"
+    }
+  },
+  "require": {
+    "php": "^7.1|^8",
+    "ext-openssl": "*",
+    "paragonie/easy-ecc": "dev-harden-phpecc",
+    "paragonie/paseto": "dev-new-versions-implementation"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9",
+    "vimeo/psalm": "^4"
+  },
+  "scripts": {
+    "full-test": [
+      "@static-analysis",
+      "@test"
+    ],
+    "static-analysis": "psalm",
+    "test": "phpunit"
+  }
+}
