@@ -2,48 +2,55 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
-use ParagonIE\Paserk\Operations\Wrap\Pie;
-use ParagonIE\Paserk\Operations\Wrap;
+use ParagonIE\HiddenString\HiddenString;
+use ParagonIE\Paserk\Operations\PBKW;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\PaserkTypeInterface;
+use ParagonIE\Paserk\Util;
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
-use ParagonIE\Paseto\Keys\SymmetricKey;
 
 /**
- * Class SecretWrap
+ * Class SecretPW
  * @package ParagonIE\Paserk\Types
  */
-class SecretWrap implements PaserkTypeInterface
+class SecretPW implements PaserkTypeInterface
 {
     /** @var array<string, string> */
     protected $localCache = [];
 
-    /** @var Wrap $wrap */
-    protected $wrap;
+    /** @var array $options */
+    protected $options;
+
+    /** @var HiddenString $password */
+    protected $password;
 
     /**
-     * SecretWrap constructor.
-     * @param Wrap $wrap
+     * SecretPW constructor.
+     * @param HiddenString $password
+     * @param array $options
      */
-    public function __construct(Wrap $wrap)
+    public function __construct(HiddenString $password, array $options = [])
     {
-        $this->wrap = $wrap;
+        $this->password = $password;
+        $this->options = $options;
         $this->localCache = [];
     }
 
     /**
-     * @param SymmetricKey $key
-     * @return static
+     * @param string $paserk
+     * @return KeyInterface
+     *
+     * @throws PaserkException
      */
-    public static function initWithKey(SymmetricKey $key): self
-    {
-        return new self(new Wrap(new Pie($key)));
-    }
-
     public function decode(string $paserk): KeyInterface
     {
-        return $this->wrap->secretUnwrap($paserk);
+        $pieces = explode('.', $paserk);
+        $header = $pieces[0];
+        $version = Util::getPasetoVersion($header);
+        $pbkw = PBKW::forVersion($version);
+
+        return $pbkw->secretPwUnwrap($paserk, $this->password);
     }
 
     /**
@@ -58,7 +65,8 @@ class SecretWrap implements PaserkTypeInterface
         }
         $secretId = (new SecretType())->encode($key);
         if (!array_key_exists($secretId, $this->localCache)) {
-            $this->localCache[$secretId] = $this->wrap->secretWrap($key);
+            $this->localCache[$secretId] = PBKW::forVersion($key->getProtocol())
+                ->secretPwWrap($key, $this->password, $this->options);
         }
         return $this->localCache[$secretId];
     }
@@ -68,12 +76,13 @@ class SecretWrap implements PaserkTypeInterface
      */
     public static function getTypeLabel(): string
     {
-        return 'secret-wrap';
+        return 'secret-pw';
     }
 
     /**
      * @param KeyInterface $key
      * @return string
+     *
      * @throws PaserkException
      * @throws \SodiumException
      */

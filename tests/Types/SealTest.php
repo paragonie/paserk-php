@@ -7,10 +7,12 @@ use ParagonIE\Paserk\Operations\Key\SealingSecretKey;
 use ParagonIE\Paserk\Types\Lid;
 use ParagonIE\Paserk\Types\Seal;
 use ParagonIE\Paseto\Keys\SymmetricKey;
-use ParagonIE\Paseto\Protocol\Version1;
-use ParagonIE\Paseto\Protocol\Version2;
-use ParagonIE\Paseto\Protocol\Version3;
-use ParagonIE\Paseto\Protocol\Version4;
+use ParagonIE\Paseto\Protocol\{
+    Version1,
+    Version2,
+    Version3,
+    Version4
+};
 use ParagonIE\Paseto\ProtocolInterface;
 use PHPUnit\Framework\TestCase;
 
