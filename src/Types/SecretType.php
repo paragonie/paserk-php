@@ -117,7 +117,7 @@ class SecretType implements PaserkTypeInterface
      */
     public function id(KeyInterface $key): string
     {
-        return Pid::encode(
+        return Sid::encode(
             $key->getProtocol(),
             $this->encode($key)
         );
