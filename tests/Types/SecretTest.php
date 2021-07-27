@@ -1,12 +1,11 @@
 <?php
-
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Tests\Types;
 
-use ParagonIE\Paserk\PaserkException;
-use ParagonIE\Paserk\Util;
-use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
-use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
+use ParagonIE\Paseto\Keys\{
+    AsymmetricPublicKey,
+    AsymmetricSecretKey
+};
 use ParagonIE\Paseto\Protocol\{
     Version1,
     Version2,
