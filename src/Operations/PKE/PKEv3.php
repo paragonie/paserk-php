@@ -30,7 +30,6 @@ class PKEv3 implements PKEInterface
         return 'k3.seal.';
     }
 
-
     /**
      * @link https://github.com/paseto-standard/paserk/blob/master/operations/PKE.md#v3-encryption
      *
