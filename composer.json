@@ -23,6 +23,7 @@
     "php": "^7.1|^8",
     "ext-openssl": "*",
     "paragonie/easy-ecc": "dev-harden-phpecc",
+    "paragonie/hidden-string": "^1|^2",
     "paragonie/paseto": "dev-new-versions-implementation"
   },
   "require-dev": {
