@@ -68,7 +68,7 @@ class Seal implements PaserkTypeInterface
         }
         $localId = (new Local())->encode($key);
         if (!array_key_exists($localId, $this->localCache)) {
-            $pke = new PKE($this->sk->getProtocol());
+            $pke = new PKE($this->pk->getProtocol());
             $this->localCache[$localId] = $pke->seal($key, $this->pk);
         }
         return $this->localCache[$localId];

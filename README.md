@@ -17,3 +17,73 @@ The PASERK Specification can be found [in this repository](https://github.com/pa
 ```terminal
 composer require paragonie/paserk
 ```
+
+## Example: Public-key Encryption
+
+### Wrapping
+
+```php
+<?php
+use ParagonIE\Paseto\Builder;
+use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\Protocol\Version4;
+use ParagonIE\Paserk\Operations\Key\SealingPublicKey;
+use ParagonIE\Paserk\Types\Seal;
+
+$version = new Version4();
+
+// First, you need a sealing keypair.
+
+// $sealingSecret = ParagonIE\Paserk\Operations\Key\SealingSecretKey::generate();
+// $sealingPublic = $sealingSecret->getPublicKey();
+// var_dump($sealingSecret->encode(), $sealingPublic->encode());
+
+$sealingPublic = SealingPublicKey::fromEncodedString(
+    "vdd1m2Eri8ggYYR5YtnmEninoiCxH1eguGNKe4pes3g",
+    $version
+);
+$sealer = new Seal($sealingPublic);
+
+$key = SymmetricKey::generate($version);
+
+$paserk = $sealer->encode($key);
+$paseto = Builder::getLocal($key, $version)
+    ->with('test', 'readme')
+    ->withExpiration(
+        (new DateTime('NOW'))
+            ->add(new DateInterval('P01D'))
+    )
+    ->withFooterArray(['kid' => $sealer->id($key)])
+    ->toString();
+
+var_dump($paserk, $paseto);
+```
+
+### Unwrapping
+
+```php
+<?php
+use ParagonIE\Paseto\Protocol\Version4;
+use ParagonIE\Paserk\Operations\Key\SealingSecretKey;
+use ParagonIE\Paserk\Types\Seal;
+use ParagonIE\Paseto\Parser as PasetoParser;
+use ParagonIE\Paseto\ProtocolCollection;
+
+// From previous example:
+$paserk = "k4.seal.F2qE4x0JfqT7JYhOB7S12SikvLaRuEpxRkgxxHfh4hVpE1JfwIDnreuhs9v5gjoBl3WTVjdIz6NkwQdqRoS2EDc3yGvdf_Da4K1xUSJ8IVTn4HQeol5ruYwjQlA_Ph4N";
+$paseto = "v4.local.hYG-BfpTTM3bb-xZ-q5-w77XGayS4WA8kA5R5ZL85u3nzgrWba5NdqgIouFn71CJyGAff1eloirzz3sWRdVXnDeSIYxXDIerNkbLI5ALn24JehhSLKrv8R2-yhfo_XZF9XEASXtwrOyMNjeEAan5kqO6Dg.eyJraWQiOiJrNC5saWQueDAycGJDRmhxU1Q4endnbEJyR3VqWE9LYU5kRkJjY1dsTFFRN0pzcGlZM18ifQ";
+
+$version = new Version4();
+$sealingSecret = SealingSecretKey::fromEncodedString(
+    "j043XiZTuGLleB0kAy8f3Tz-lEePK_ynEWPp4OyB-lS913WbYSuLyCBhhHli2eYSeKeiILEfV6C4Y0p7il6zeA",
+    $version
+);
+$sealingPublic = $sealingSecret->getPublicKey();
+
+$sealer = new Seal($sealingPublic, $sealingSecret);
+$unwrapped = $sealer->decode($paserk);
+$parsed = PasetoParser::getLocal($unwrapped, ProtocolCollection::v4())
+    ->parse($paseto);
+
+var_dump($parsed->getClaims());
+```
