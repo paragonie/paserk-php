@@ -1,4 +1,4 @@
-# PASERK
+# PASERK (PHP)
 
 [![Build Status](https://github.com/paragonie/paserk-php/actions/workflows/ci.yml/badge.svg)](https://github.com/paragonie/paserk-php/actions)
 [![Latest Stable Version](https://poser.pugx.org/paragonie/paserk-php/v/stable)](https://packagist.org/packages/paragonie/paserk)
@@ -44,9 +44,13 @@ $sealingPublic = SealingPublicKey::fromEncodedString(
 );
 $sealer = new Seal($sealingPublic);
 
+// Generate a random one-time key, which will be encrypted with the public key:
 $key = SymmetricKey::generate($version);
 
+// Seal means "public key encryption":
 $paserk = $sealer->encode($key);
+
+// Now let's associate this PASERK with a PASETO that uses the local key:
 $paseto = Builder::getLocal($key, $version)
     ->with('test', 'readme')
     ->withExpiration(
@@ -83,12 +87,15 @@ $sealingSecret = SealingSecretKey::fromEncodedString(
 );
 $sealingPublic = $sealingSecret->getPublicKey();
 
+// Unwrap the sytmmetric key for `v4.local.` tokens.
 $sealer = new Seal($sealingPublic, $sealingSecret);
 $unwrapped = $sealer->decode($paserk);
 
+// Parse the PASETO
 $parsed = PasetoParser::getLocal($unwrapped, ProtocolCollection::v4())
     ->parse($paseto);
 
+// Get the claims from the parsed and validated token:
 var_dump($parsed->getClaims());
 /*
 array(2) {
@@ -99,6 +106,7 @@ array(2) {
 }
 */
 
+// Observe the Key ID is the same as the value stored in the footer.
 var_dump(Lid::encode($version, $paserk));
 var_dump($parsed->getFooterArray()['kid']);
 /*
