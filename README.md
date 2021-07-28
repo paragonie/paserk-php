@@ -114,3 +114,20 @@ string(51) "k4.lid.x02pbCFhqST8zwglBrGujXOKaNdFBccWlLQQ7JspiY3_"
 string(51) "k4.lid.x02pbCFhqST8zwglBrGujXOKaNdFBccWlLQQ7JspiY3_"
 */
 ```
+
+## PASERK Feature Coverage
+
+- [x] [`lid`](https://github.com/paseto-standard/paserk/blob/master/types/lid.md) 
+- [x] [`local`](https://github.com/paseto-standard/paserk/blob/master/types/local.md) 
+- [x] [`seal`](https://github.com/paseto-standard/paserk/blob/master/types/seal.md)
+- [x] [`local-wrap`](https://github.com/paseto-standard/paserk/blob/master/types/local-wrap.md)
+    - [x] [`pie`](https://github.com/paseto-standard/paserk/blob/master/operations/Wrap/pie.md)
+- [x] [`local-pw`](https://github.com/paseto-standard/paserk/blob/master/types/local-pw.md)
+    * (Requires ext-sodium for v2/v4 keys, due to Argon2id)
+- [x] [`pid`](https://github.com/paseto-standard/paserk/blob/master/types/pid.md)
+- [x] [`public`](https://github.com/paseto-standard/paserk/blob/master/types/public.md)
+- [x] [`secret`](https://github.com/paseto-standard/paserk/blob/master/types/secret.md)
+- [x] [`secret-wrap`](https://github.com/paseto-standard/paserk/blob/master/types/secret-wrap.md)
+    - [x] [`pie`](https://github.com/paseto-standard/paserk/blob/master/operations/Wrap/pie.md)
+- [x] [`secret-pw`](https://github.com/paseto-standard/paserk/blob/master/types/secret-pw.md)
+    * (Requires ext-sodium for v2/v4 keys, due to Argon2id)
