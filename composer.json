@@ -24,7 +24,7 @@
     "ext-openssl": "*",
     "paragonie/easy-ecc": "dev-harden-phpecc",
     "paragonie/hidden-string": "^1|^2",
-    "paragonie/paseto": "dev-new-versions-implementation"
+    "paragonie/paseto": "dev-master"
   },
   "require-dev": {
     "phpunit/phpunit": "^7|^8|^9",
