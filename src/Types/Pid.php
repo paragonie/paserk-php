@@ -24,7 +24,7 @@ class Pid implements IdInterface
      */
     public static function encodePublic(AsymmetricPublicKey $pk): string
     {
-        return self::encode($pk->getProtocol(), (new PublicType())->encode($key));
+        return self::encode($pk->getProtocol(), (new PublicType())->encode($pk));
     }
 
     /**
