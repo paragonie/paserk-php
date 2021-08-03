@@ -102,7 +102,7 @@ class PKEv3 implements PKEInterface
         }
 
         // Step 7:
-        return Base64UrlSafe::encode($tag . $eph_pk_compressed . $edk);
+        return Base64UrlSafe::encodeUnpadded($tag . $eph_pk_compressed . $edk);
     }
 
     /**
