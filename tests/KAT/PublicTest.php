@@ -48,12 +48,16 @@ class PublicTest extends KnownAnswers
     protected function genericTest(ProtocolInterface $version, string $name, array $tests): void
     {
         foreach ($tests as $test) {
-            if ($version instanceof Version1) {
+            if ($version instanceof Version1 || $version instanceof Version3) {
                 $publickey = new AsymmetricPublicKey($test['key'], $version);
             } else {
                 $publickey = new AsymmetricPublicKey(Hex::decode($test['key']), $version);
             }
-            $this->assertSame($test['paserk'], (new PublicType())->encode($publickey), $test['name']);
+            $this->assertSame(
+                $test['paserk'],
+                (new PublicType())->encode($publickey),
+                $test['name']
+            );
         }
     }
 }
