@@ -100,7 +100,7 @@ class PKEv1 implements PKEInterface
             $x ^= $x;
             $Ak ^= $Ak;
         }
-        return Base64UrlSafe::encode($t . $edk . $c);
+        return Base64UrlSafe::encodeUnpadded($t . $edk . $c);
     }
 
     /**

@@ -99,7 +99,7 @@ class PBKWv1 implements PBKWInterface
         );
 
         // Step 8:
-        return Base64UrlSafe::encode(
+        return Base64UrlSafe::encodeUnpadded(
             $salt .
             $iterPack .
             $nonce .
