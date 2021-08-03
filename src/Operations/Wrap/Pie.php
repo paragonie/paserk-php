@@ -121,7 +121,7 @@ class Pie implements WrapInterface
         }
 
         // Step 6:
-        return Base64UrlSafe::encode($t . $n . $c);
+        return Base64UrlSafe::encodeUnpadded($t . $n . $c);
     }
 
     /**
@@ -161,7 +161,7 @@ class Pie implements WrapInterface
         // Step 5:
         $t = sodium_crypto_generichash($header . $n . $c);
 
-        return Base64UrlSafe::encode($t . $n . $c);
+        return Base64UrlSafe::encodeUnpadded($t . $n . $c);
     }
 
 

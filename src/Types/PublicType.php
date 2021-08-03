@@ -35,8 +35,8 @@ class PublicType implements PaserkTypeInterface
         if ($pieces[0] === 'k1') {
             return $this->decodeV1($pieces[2]);
         }
-        return new AsymmetricPublicKey(
-            Base64UrlSafe::decode($pieces[2]),
+        return AsymmetricPublicKey::fromEncodedString(
+            $pieces[2],
             Util::getPasetoVersion($pieces[0])
         );
     }

@@ -73,7 +73,7 @@ class PKEv2 implements PKEInterface
             $xk ^= $xk;
             $Ak ^= $Ak;
         }
-        return Base64UrlSafe::encode($tag . $eph_pk . $edk);
+        return Base64UrlSafe::encodeUnpadded($tag . $eph_pk . $edk);
     }
 
     /**

@@ -106,7 +106,7 @@ class PBKWv2 implements PBKWInterface
             $Ak
         );
 
-        return Base64UrlSafe::encode(
+        return Base64UrlSafe::encodeUnpadded(
             $salt . $memPack . $opsPack . $paraPack . $nonce . $edk . $tag
         );
     }
