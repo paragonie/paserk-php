@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
+use ParagonIE\Paserk\ConstraintTrait;
 use ParagonIE\Paserk\Operations\Wrap\Pie;
 use ParagonIE\Paserk\Operations\Wrap;
 use ParagonIE\Paserk\PaserkException;
@@ -15,6 +16,8 @@ use ParagonIE\Paseto\Keys\SymmetricKey;
  */
 class LocalWrap implements PaserkTypeInterface
 {
+    use ConstraintTrait;
+
     /** @var array<string, string> */
     protected $localCache = [];
 
@@ -40,9 +43,14 @@ class LocalWrap implements PaserkTypeInterface
         return new self(new Wrap(new Pie($key)));
     }
 
+    /**
+     * @throws PaserkException
+     */
     public function decode(string $paserk): KeyInterface
     {
-        return $this->wrap->localUnwrap($paserk);
+        $out = $this->wrap->localUnwrap($paserk);
+        $this->throwIfInvalidProtocol($out->getProtocol());
+        return $out;
     }
 
     /**
@@ -55,6 +63,7 @@ class LocalWrap implements PaserkTypeInterface
         if (!($key instanceof SymmetricKey)) {
             throw new PaserkException('Only symmetric keys are allowed here');
         }
+        $this->throwIfInvalidProtocol($key->getProtocol());
         $localId = (new Local())->encode($key);
         if (!array_key_exists($localId, $this->localCache)) {
             $this->localCache[$localId] = $this->wrap->localWrap($key);

@@ -4,6 +4,7 @@ namespace ParagonIE\Paserk\Types;
 
 use ParagonIE\ConstantTime\Base64;
 use ParagonIE\ConstantTime\Base64UrlSafe;
+use ParagonIE\Paserk\ConstraintTrait;
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 use ParagonIE\Paserk\PaserkException;
@@ -17,6 +18,8 @@ use ParagonIE\Paseto\Protocol\Version1;
  */
 class SecretType implements PaserkTypeInterface
 {
+    use ConstraintTrait;
+
     /**
      * @param string $paserk
      * @return KeyInterface
@@ -32,12 +35,14 @@ class SecretType implements PaserkTypeInterface
         if (!hash_equals(self::getTypeLabel(), $pieces[1])) {
             throw new PaserkException('Invalid PASERK');
         }
+        $version = Util::getPasetoVersion($pieces[0]);
+        $this->throwIfInvalidProtocol($version);
         if ($pieces[0] === 'k1') {
             return $this->decodeV1($pieces[2]);
         }
         return new AsymmetricSecretKey(
             Base64UrlSafe::decode($pieces[2]),
-            Util::getPasetoVersion($pieces[0])
+            $version
         );
     }
 
@@ -67,6 +72,7 @@ class SecretType implements PaserkTypeInterface
         if (!($key instanceof AsymmetricSecretKey)) {
             throw new PaserkException('Only symmetric keys can be serialized as kx.local.');
         }
+        $this->throwIfInvalidProtocol($key->getProtocol());
         $version = Util::getPaserkHeader($key->getProtocol());
         switch ($version) {
             case 'k1':

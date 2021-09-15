@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
 use ParagonIE\HiddenString\HiddenString;
+use ParagonIE\Paserk\ConstraintTrait;
 use ParagonIE\Paserk\Operations\PBKW;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\PaserkTypeInterface;
@@ -16,6 +17,8 @@ use ParagonIE\Paseto\Keys\SymmetricKey;
  */
 class LocalPW implements PaserkTypeInterface
 {
+    use ConstraintTrait;
+
     /** @var array<string, string> */
     protected $localCache = [];
 
@@ -47,6 +50,7 @@ class LocalPW implements PaserkTypeInterface
         $pieces = explode('.', $paserk);
         $header = $pieces[0];
         $version = Util::getPasetoVersion($header);
+        $this->throwIfInvalidProtocol($version);
         $pbkw = PBKW::forVersion($version);
 
         return $pbkw->localPwUnwrap($paserk, $this->password);
@@ -62,6 +66,7 @@ class LocalPW implements PaserkTypeInterface
         if (!($key instanceof SymmetricKey)) {
             throw new PaserkException('Only symmetric keys are allowed here');
         }
+        $this->throwIfInvalidProtocol($key->getProtocol());
         $localId = (new Local())->encode($key);
         if (!array_key_exists($localId, $this->localCache)) {
             $this->localCache[$localId] = PBKW::forVersion($key->getProtocol())

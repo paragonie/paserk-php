@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
 use ParagonIE\HiddenString\HiddenString;
+use ParagonIE\Paserk\ConstraintTrait;
 use ParagonIE\Paserk\Operations\PBKW;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\PaserkTypeInterface;
@@ -16,6 +17,8 @@ use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
  */
 class SecretPW implements PaserkTypeInterface
 {
+    use ConstraintTrait;
+
     /** @var array<string, string> */
     protected $localCache = [];
 
@@ -48,6 +51,7 @@ class SecretPW implements PaserkTypeInterface
         $pieces = explode('.', $paserk);
         $header = $pieces[0];
         $version = Util::getPasetoVersion($header);
+        $this->throwIfInvalidProtocol($version);
         $pbkw = PBKW::forVersion($version);
 
         return $pbkw->secretPwUnwrap($paserk, $this->password);
@@ -63,6 +67,7 @@ class SecretPW implements PaserkTypeInterface
         if (!($key instanceof AsymmetricSecretKey)) {
             throw new PaserkException('Only asymmetric secret keys are allowed here');
         }
+        $this->throwIfInvalidProtocol($key->getProtocol());
         $secretId = (new SecretType())->encode($key);
         if (!array_key_exists($secretId, $this->localCache)) {
             $this->localCache[$secretId] = PBKW::forVersion($key->getProtocol())

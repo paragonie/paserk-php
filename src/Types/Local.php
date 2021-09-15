@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
 use ParagonIE\ConstantTime\Base64UrlSafe;
+use ParagonIE\Paserk\ConstraintTrait;
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paserk\PaserkException;
@@ -15,6 +16,8 @@ use ParagonIE\Paserk\Util;
  */
 class Local implements PaserkTypeInterface
 {
+    use ConstraintTrait;
+
     /**
      * @param KeyInterface $key
      * @return string
@@ -26,6 +29,7 @@ class Local implements PaserkTypeInterface
         if (!($key instanceof SymmetricKey)) {
             throw new PaserkException('Only symmetric keys can be serialized as kx.local.');
         }
+        $this->throwIfInvalidProtocol($key->getProtocol());
         $version = Util::getPaserkHeader($key->getProtocol());
         return implode('.', [$version, self::getTypeLabel(), $key->encode()]);
     }
@@ -45,9 +49,11 @@ class Local implements PaserkTypeInterface
         if (!hash_equals(self::getTypeLabel(), $pieces[1])) {
             throw new PaserkException('Invalid PASERK');
         }
+        $version = Util::getPasetoVersion($pieces[0]);
+        $this->throwIfInvalidProtocol($version);
         return new SymmetricKey(
             Base64UrlSafe::decode($pieces[2]),
-            Util::getPasetoVersion($pieces[0])
+            $version
         );
     }
 

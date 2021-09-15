@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
+use ParagonIE\Paserk\ConstraintTrait;
 use ParagonIE\Paserk\Operations\Key\SealingPublicKey;
 use ParagonIE\Paserk\Operations\Key\SealingSecretKey;
 use ParagonIE\Paserk\Operations\PKE;
@@ -16,6 +17,8 @@ use ParagonIE\Paseto\Keys\SymmetricKey;
  */
 class Seal implements PaserkTypeInterface
 {
+    use ConstraintTrait;
+
     /** @var SealingPublicKey $pk */
     protected $pk;
 
@@ -51,8 +54,10 @@ class Seal implements PaserkTypeInterface
         if (is_null($this->sk)) {
             throw new PaserkException('No secret key was provided; cannot unseal');
         }
-        return (new PKE($this->sk->getProtocol()))
+        $unsealed = (new PKE($this->sk->getProtocol()))
             ->unseal($paserk, $this->sk);
+        $this->throwIfInvalidProtocol($unsealed->getProtocol());
+        return $unsealed;
     }
 
     /**
@@ -66,6 +71,7 @@ class Seal implements PaserkTypeInterface
         if (!($key instanceof SymmetricKey)) {
             throw new PaserkException('Only symmetric keys are allowed here');
         }
+        $this->throwIfInvalidProtocol($key->getProtocol());
         $localId = (new Local())->encode($key);
         if (!array_key_exists($localId, $this->localCache)) {
             $pke = new PKE($this->pk->getProtocol());
