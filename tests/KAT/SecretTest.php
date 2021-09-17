@@ -49,11 +49,19 @@ class SecretTest extends KnownAnswers
     {
         foreach ($tests as $test) {
             if ($version instanceof Version1) {
-                $publickey = new AsymmetricSecretKey($test['key'], $version);
+                $secretkey = new AsymmetricSecretKey($test['key'], $version);
+                $this->assertSame(
+                    $test['public-key'],
+                    $secretkey->getPublicKey()->raw()
+                );
             } else {
-                $publickey = new AsymmetricSecretKey(Hex::decode($test['key']), $version);
+                $secretkey = new AsymmetricSecretKey(Hex::decode($test['key']), $version);
+                $this->assertSame(
+                    $test['public-key'],
+                    Hex::encode($secretkey->getPublicKey()->raw())
+                );
             }
-            $this->assertSame($test['paserk'], (new SecretType())->encode($publickey), $test['name']);
+            $this->assertSame($test['paserk'], (new SecretType())->encode($secretkey), $test['name']);
         }
     }
 }
