@@ -145,6 +145,9 @@ class Pie implements WrapInterface
         // Step 4:
         $c = sodium_crypto_stream_xchacha20_xor($key->raw(), $n2, $Ek);
 
+        // Step 5:
+        $t = sodium_crypto_generichash($header . $n . $c, $Ak);
+
         // Wipe keys from memory after use:
         try {
             sodium_memzero($Ek);
@@ -157,9 +160,6 @@ class Pie implements WrapInterface
             $x ^= $x;
             $Ak ^= $Ak;
         }
-
-        // Step 5:
-        $t = sodium_crypto_generichash($header . $n . $c);
 
         return Base64UrlSafe::encodeUnpadded($t . $n . $c);
     }
@@ -283,7 +283,7 @@ class Pie implements WrapInterface
         $Ak = sodium_crypto_generichash("\x81" . $n, $this->wrappingKey->raw());
 
         // Step 3:
-        $t2 = sodium_crypto_generichash($header . $n . $c);
+        $t2 = sodium_crypto_generichash($header . $n . $c, $Ak);
 
         // Step 4:
         if (!hash_equals($t2, $t)) {
