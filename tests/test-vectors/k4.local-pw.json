@@ -1,15 +1,15 @@
 {
-  "name": "PASERK k2.local-pw Test Vectors",
+  "name": "PASERK k4.local-pw Test Vectors",
   "tests": [
     {
-      "name": "k2.local-pw-1",
+      "name": "k4.local-pw-1",
       "unwrapped": "707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f",
       "password": "correct horse battery staple",
       "options": {"memlimit": 67108864, "opslimit": 2},
       "paserk": "k4.local-pw._bru5tnkPSFXOtKhBTmW4gAAAAAEAAAAAAAAAgAAAAGKI3PyFS2vyQ9o5qowCR_GUXskLmdV1bjjc3vqnbwN7hVG1lAUCGjElTGIoH-K6lnkHnP4uaFBKWEtB3xFEGzAjzBSnl_JBmwLYK5jstjAV6LnJm_NOt0j"
     },
     {
-      "name": "k2.local-pw-2",
+      "name": "k4.local-pw-2",
       "unwrapped": "707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f",
       "password": "correct horse battery staple",
       "options": {"memlimit": 268435456, "opslimit": 3},
