@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace ParagonIE\Paserk\Operations\Wrap;
 
+use ParagonIE\ConstantTime\Base64;
 use ParagonIE\ConstantTime\Base64UrlSafe;
 use ParagonIE\ConstantTime\Binary;
 use ParagonIE\Paserk\Operations\WrapInterface;
@@ -185,6 +186,13 @@ class Pie implements WrapInterface
         $header = implode('.', array_slice($pieces, 0, 3)) . '.';
         if (in_array($pieces[0], ['k1', 'k3'], true)) {
             $bytes = $this->unwrapKeyV1V3($header, $pieces[3]);
+            // Handle RSA private keys
+            if ($pieces[0] === 'k1' && $pieces[1] === 'secret-wrap') {
+                $b64 = Base64::encode($bytes);
+                $bytes = '-----BEGIN RSA PRIVATE KEY-----' . "\n" .
+                    chunk_split($b64, 64, "\n") .
+                    '-----END RSA PRIVATE KEY-----';
+            }
         } elseif (in_array($pieces[0], ['k2', 'k4'], true)) {
             $bytes = $this->unwrapKeyV2V4($header, $pieces[3]);
         } else {
