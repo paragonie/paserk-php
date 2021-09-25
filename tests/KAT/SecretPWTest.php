@@ -52,7 +52,7 @@ class SecretPWTest extends KnownAnswers
     {
         foreach ($tests as $test) {
             $wrapper = new SecretPW(
-                new HiddenString(Hex::encode($test['password'])),
+                new HiddenString($test['password']),
                 $test['options'] ?? []
             );
             $unwrapped = $wrapper->decode($test['paserk']);
