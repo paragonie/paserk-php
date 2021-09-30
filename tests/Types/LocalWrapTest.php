@@ -53,7 +53,8 @@ class LocalWrapTest extends TestCase
             $decoded = $lw->decode($encoded);
             $this->assertSame(
                 $key->encode(),
-                $decoded->encode()
+                $decoded->encode(),
+                'local-wrap ' . $key->getProtocol()::header()
             );
         }
     }

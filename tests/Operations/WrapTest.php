@@ -65,13 +65,21 @@ class WrapTest extends TestCase
             $expect = $vers['header'] . '.local-wrap.pie.';
             $this->assertStringStartsWith($expect, $local);
             $unwrapLocal = $wrap->localUnwrap($local);
-            $this->assertEquals($sym->encode(), $unwrapLocal->encode());
+            $this->assertEquals(
+                $sym->encode(),
+                $unwrapLocal->encode(),
+                'local-wrap ' . $vers['header']
+            );
 
             $secret = $wrap->secretWrap($sk);
             $expect = $vers['header'] . '.secret-wrap.pie.';
             $this->assertStringStartsWith($expect, $secret);
             $unwrapSecret = $wrap->secretUnwrap($secret);
-            $this->assertEquals($sk->encode(), $unwrapSecret->encode());
+            $this->assertEquals(
+                $sk->encode(),
+                $unwrapSecret->encode(),
+                'secret-wrap ' . $vers['header']
+            );
         }
     }
 }

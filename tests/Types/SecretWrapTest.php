@@ -4,6 +4,7 @@ namespace ParagonIE\Paserk\Tests\Types;
 
 use ParagonIE\Paserk\Types\SecretWrap;
 use ParagonIE\Paserk\Types\Sid;
+use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
 use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\Protocol\{
@@ -30,6 +31,14 @@ class SecretWrapTest extends TestCase
     protected $v3sk;
     /** @var AsymmetricSecretKey $v4sk */
     protected $v4sk;
+    /** @var AsymmetricPublicKey $v1pk */
+    protected $v1pk;
+    /** @var AsymmetricPublicKey $v2pk */
+    protected $v2pk;
+    /** @var AsymmetricPublicKey $v3pk */
+    protected $v3pk;
+    /** @var AsymmetricPublicKey $v4pk */
+    protected $v4pk;
 
     /**
      * @throws \Exception
@@ -66,7 +75,8 @@ class SecretWrapTest extends TestCase
             $decoded = $sw->decode($encoded);
             $this->assertSame(
                 $key->encode(),
-                $decoded->encode()
+                $decoded->encode(),
+                'secret-wrap ' . $key->getProtocol()::header()
             );
         }
     }
