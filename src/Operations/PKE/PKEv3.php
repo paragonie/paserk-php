@@ -67,7 +67,7 @@ class PKEv3 implements PKEInterface
         // Step 4:
         $Ak = hash(
             'sha384',
-            "\x01" . $header . $xk . $eph_pk_compressed . $pk_compressed,
+            "\x02" . $header . $xk . $eph_pk_compressed . $pk_compressed,
             true
         );
 
@@ -137,7 +137,7 @@ class PKEv3 implements PKEInterface
         // Step 2:
         $Ak = hash(
             'sha384',
-            "\x01" . $header . $xk . $eph_pk_compressed . $pk_compressed,
+            "\x02" . $header . $xk . $eph_pk_compressed . $pk_compressed,
             true
         );
 
