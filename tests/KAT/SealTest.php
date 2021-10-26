@@ -5,7 +5,6 @@ namespace ParagonIE\Paserk\Tests\KAT;
 use Exception;
 use ParagonIE\ConstantTime\Hex;
 use ParagonIE\Paserk\PaserkException;
-use ParagonIE\Paserk\Types\LocalWrap;
 use ParagonIE\Paserk\Tests\KnownAnswers;
 use ParagonIE\Paserk\Types\Seal;
 use ParagonIE\Paserk\Operations\Key\{
@@ -21,7 +20,7 @@ use ParagonIE\Paseto\Protocol\{
 use ParagonIE\Paseto\ProtocolInterface;
 
 /**
- * @covers LocalWrap
+ * @covers Seal
  */
 class SealTest extends KnownAnswers
 {
