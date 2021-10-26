@@ -9,6 +9,7 @@ use ParagonIE\Paseto\Protocol\{
     Version4
 };
 use ParagonIE\Paseto\ProtocolInterface;
+use SodiumException;
 
 /**
  * Class Util
@@ -57,5 +58,18 @@ class Util
             return 'k4';
         }
         throw new PaserkException('Invalid version provided');
+    }
+
+    /**
+     * @param string $byref
+     * @psalm-param-out string $byref
+     */
+    public static function wipe(string &$byref): void
+    {
+        try {
+            sodium_memzero($byref);
+        } catch (SodiumException $ex) {
+            $byref ^= $byref;
+        }
     }
 }

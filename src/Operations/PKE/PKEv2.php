@@ -2,13 +2,19 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Operations\PKE;
 
-use ParagonIE\ConstantTime\Base64UrlSafe;
-use ParagonIE\ConstantTime\Binary;
-use ParagonIE\Paserk\Operations\Key\SealingPublicKey;
-use ParagonIE\Paserk\Operations\Key\SealingSecretKey;
+use ParagonIE\ConstantTime\{
+    Base64UrlSafe,
+    Binary
+};
+use ParagonIE\Paserk\Operations\Key\{
+    SealingPublicKey,
+    SealingSecretKey
+};
 use ParagonIE\Paserk\Operations\PKEInterface;
 use ParagonIE\Paserk\PaserkException;
+use ParagonIE\Paserk\Util;
 use ParagonIE\Paseto\Keys\SymmetricKey;
+use SodiumException;
 
 /**
  * Class PKEv2v4
@@ -30,7 +36,7 @@ class PKEv2 implements PKEInterface
      * @param SymmetricKey $ptk
      * @param SealingPublicKey $pk
      * @return string
-     * @throws \SodiumException
+     * @throws SodiumException
      */
     public function seal(SymmetricKey $ptk, SealingPublicKey $pk): string
     {
@@ -62,17 +68,10 @@ class PKEv2 implements PKEInterface
             $Ek
         );
         $tag = sodium_crypto_generichash($header . $eph_pk . $edk, $Ak);
-        try {
-            sodium_memzero($Ek);
-            sodium_memzero($nonce);
-            sodium_memzero($xk);
-            sodium_memzero($Ak);
-        } catch (\SodiumException $ex) {
-            $Ek ^= $Ek;
-            $nonce ^= $nonce;
-            $xk ^= $xk;
-            $Ak ^= $Ak;
-        }
+        Util::wipe($Ek);
+        Util::wipe($nonce);
+        Util::wipe($xk);
+        Util::wipe($Ak);
         return Base64UrlSafe::encodeUnpadded($tag . $eph_pk . $edk);
     }
 
@@ -83,6 +82,9 @@ class PKEv2 implements PKEInterface
      * @param string $encoded
      * @param SealingSecretKey $sk
      * @return SymmetricKey
+     *
+     * @throws PaserkException
+     * @throws SodiumException
      */
     public function unseal(string $header, string $encoded, SealingSecretKey $sk): SymmetricKey
     {
@@ -126,19 +128,11 @@ class PKEv2 implements PKEInterface
             $nonce,
             $Ek
         );
-        try {
-            sodium_memzero($Ek);
-            sodium_memzero($nonce);
-            sodium_memzero($xk);
-            sodium_memzero($xsk);
-            sodium_memzero($Ak);
-        } catch (\SodiumException $ex) {
-            $Ek ^= $Ek;
-            $nonce ^= $nonce;
-            $xk ^= $xk;
-            $xsk ^= $xsk;
-            $Ak ^= $Ak;
-        }
+        Util::wipe($Ek);
+        Util::wipe($nonce);
+        Util::wipe($xk);
+        Util::wipe($xsk);
+        Util::wipe($Ak);
         return new SymmetricKey($ptk, $sk->getProtocol());
     }
 }

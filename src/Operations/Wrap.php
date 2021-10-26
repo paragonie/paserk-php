@@ -51,7 +51,6 @@ class Wrap
         return $unwrapped;
     }
 
-
     /**
      * @param AsymmetricSecretKey $key
      * @return string

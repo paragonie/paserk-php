@@ -16,7 +16,6 @@ use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\ProtocolInterface;
 
-
 /**
  * Class PKE
  * @package ParagonIE\Paserk\Operations

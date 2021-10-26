@@ -119,17 +119,10 @@ class Pie implements WrapInterface
         /// @SPEC DETAIL: Must cover h || c || t, in that order.
 
         // Wipe keys from memory after use:
-        try {
-            sodium_memzero($Ek);
-            sodium_memzero($n2);
-            sodium_memzero($x);
-            sodium_memzero($Ak);
-        } catch (SodiumException $ex) {
-            $Ek ^= $Ek;
-            $n2 ^= $n2;
-            $x ^= $x;
-            $Ak ^= $Ak;
-        }
+        Util::wipe($Ek);
+        Util::wipe($n2);
+        Util::wipe($x);
+        Util::wipe($Ak);
 
         // Step 6:
         return Base64UrlSafe::encodeUnpadded($t . $n . $c);
@@ -140,6 +133,9 @@ class Pie implements WrapInterface
      * @param string $header
      * @param KeyInterface $key
      * @return string
+     *
+     * @throws Exception
+     * @throws SodiumException
      */
     protected function wrapKeyV2V4(string $header, KeyInterface $key): string
     {
@@ -165,17 +161,10 @@ class Pie implements WrapInterface
         $t = sodium_crypto_generichash($header . $n . $c, $Ak);
 
         // Wipe keys from memory after use:
-        try {
-            sodium_memzero($Ek);
-            sodium_memzero($n2);
-            sodium_memzero($x);
-            sodium_memzero($Ak);
-        } catch (SodiumException $ex) {
-            $Ek ^= $Ek;
-            $n2 ^= $n2;
-            $x ^= $x;
-            $Ak ^= $Ak;
-        }
+        Util::wipe($Ek);
+        Util::wipe($n2);
+        Util::wipe($x);
+        Util::wipe($Ak);
 
         return Base64UrlSafe::encodeUnpadded($t . $n . $c);
         /// @SPEC DETAIL: Must return t || n || c (in that order)
@@ -282,17 +271,10 @@ class Pie implements WrapInterface
         );
 
         // Wipe keys from memory after use:
-        try {
-            sodium_memzero($Ek);
-            sodium_memzero($n2);
-            sodium_memzero($x);
-            sodium_memzero($Ak);
-        } catch (SodiumException $ex) {
-            $Ek ^= $Ek;
-            $n2 ^= $n2;
-            $x ^= $x;
-            $Ak ^= $Ak;
-        }
+        Util::wipe($Ek);
+        Util::wipe($n2);
+        Util::wipe($x);
+        Util::wipe($Ak);
         returN $ptk;
     }
 
@@ -337,17 +319,10 @@ class Pie implements WrapInterface
         // Step 6:
         $ptk = sodium_crypto_stream_xchacha20_xor($c, $n2, $Ek);
         // Wipe keys from memory after use:
-        try {
-            sodium_memzero($Ek);
-            sodium_memzero($n2);
-            sodium_memzero($x);
-            sodium_memzero($Ak);
-        } catch (SodiumException $ex) {
-            $Ek ^= $Ek;
-            $n2 ^= $n2;
-            $x ^= $x;
-            $Ak ^= $Ak;
-        }
+        Util::wipe($Ek);
+        Util::wipe($n2);
+        Util::wipe($x);
+        Util::wipe($Ak);
         returN $ptk;
     }
 

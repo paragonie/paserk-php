@@ -1,20 +1,27 @@
 <?php
 declare(strict_types=1);
-
 namespace ParagonIE\Paserk\Operations\PKE;
 
-use ParagonIE\ConstantTime\Base64UrlSafe;
-use ParagonIE\ConstantTime\Binary;
-use ParagonIE\ConstantTime\Hex;
-use ParagonIE\EasyECC\EasyECC;
-use ParagonIE\EasyECC\ECDSA\PublicKey;
-use ParagonIE\EasyECC\ECDSA\SecretKey;
-use ParagonIE\Paserk\Operations\Key\SealingPublicKey;
-use ParagonIE\Paserk\Operations\Key\SealingSecretKey;
+use ParagonIE\ConstantTime\{
+    Base64UrlSafe,
+    Binary,
+    Hex
+};
+use ParagonIE\EasyECC\{
+    EasyECC,
+    ECDSA\PublicKey,
+    ECDSA\SecretKey
+};
+use ParagonIE\Paserk\Operations\Key\{
+    SealingPublicKey,
+    SealingSecretKey
+};
 use ParagonIE\Paserk\Operations\PKEInterface;
 use ParagonIE\Paserk\PaserkException;
+use ParagonIE\Paserk\Util;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\Protocol\Version3;
+use Exception;
 
 /**
  * Class PKEv3
@@ -36,7 +43,8 @@ class PKEv3 implements PKEInterface
      * @param SymmetricKey $ptk
      * @param SealingPublicKey $pk
      * @return string
-     * @throws \Exception
+     *
+     * @throws Exception
      */
     public function seal(SymmetricKey $ptk, SealingPublicKey $pk): string
     {
@@ -88,18 +96,11 @@ class PKEv3 implements PKEInterface
             true
         );
 
-        try {
-            sodium_memzero($tmp);
-            sodium_memzero($Ek);
-            sodium_memzero($nonce);
-            sodium_memzero($xk);
-            sodium_memzero($Ak);
-        } catch (\SodiumException $ex) {
-            $Ek ^= $Ek;
-            $nonce ^= $nonce;
-            $xk ^= $xk;
-            $Ak ^= $Ak;
-        }
+        Util::wipe($tmp);
+        Util::wipe($Ek);
+        Util::wipe($nonce);
+        Util::wipe($xk);
+        Util::wipe($Ak);
 
         // Step 7:
         return Base64UrlSafe::encodeUnpadded($tag . $eph_pk_compressed . $edk);
@@ -114,6 +115,7 @@ class PKEv3 implements PKEInterface
      * @return SymmetricKey
      *
      * @throws PaserkException
+     * @throws Exception
      */
     public function unseal(string $header, string $encoded, SealingSecretKey $sk): SymmetricKey
     {
@@ -124,7 +126,6 @@ class PKEv3 implements PKEInterface
         $tag = Binary::safeSubstr($bin, 0, 48);
         $eph_pk_compressed = Binary::safeSubstr($bin, 48, 49);
         $edk = Binary::safeSubstr($bin, 97);
-
 
         // Step 1:
         $easyECC = new EasyECC('P384');
@@ -172,18 +173,11 @@ class PKEv3 implements PKEInterface
             $nonce
         );
 
-        try {
-            sodium_memzero($tmp);
-            sodium_memzero($Ek);
-            sodium_memzero($nonce);
-            sodium_memzero($xk);
-            sodium_memzero($Ak);
-        } catch (\SodiumException $ex) {
-            $Ek ^= $Ek;
-            $nonce ^= $nonce;
-            $xk ^= $xk;
-            $Ak ^= $Ak;
-        }
+        Util::wipe($tmp);
+        Util::wipe($Ek);
+        Util::wipe($nonce);
+        Util::wipe($xk);
+        Util::wipe($Ak);
 
         // Step 7:
         return new SymmetricKey($ptk, new Version3());

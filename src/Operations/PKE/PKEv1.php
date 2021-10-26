@@ -3,15 +3,21 @@ declare(strict_types=1);
 
 namespace ParagonIE\Paserk\Operations\PKE;
 
-use ParagonIE\ConstantTime\Base64UrlSafe;
-use ParagonIE\ConstantTime\Binary;
-use ParagonIE\Paserk\Operations\Key\SealingPublicKey;
-use ParagonIE\Paserk\Operations\Key\SealingSecretKey;
+use ParagonIE\ConstantTime\{
+    Base64UrlSafe,
+    Binary
+};
+use ParagonIE\Paserk\Operations\Key\{
+    SealingPublicKey,
+    SealingSecretKey
+};
 use ParagonIE\Paserk\Operations\PKEInterface;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\Protocol\Version1;
+use ParagonIE\Paserk\Util;
 use phpseclib\Crypt\RSA;
+use Exception;
 
 /**
  * Class PKEv1
@@ -33,7 +39,7 @@ class PKEv1 implements PKEInterface
      * @param SymmetricKey $ptk
      * @param SealingPublicKey $pk
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function seal(SymmetricKey $ptk, SealingPublicKey $pk): string
     {
@@ -89,17 +95,10 @@ class PKEv1 implements PKEInterface
 
         $t = hash_hmac('sha384', self::header() . $c . $edk, $Ak, true);
 
-        try {
-            sodium_memzero($Ek);
-            sodium_memzero($nonce);
-            sodium_memzero($x);
-            sodium_memzero($Ak);
-        } catch (\SodiumException $ex) {
-            $Ek ^= $Ek;
-            $nonce ^= $nonce;
-            $x ^= $x;
-            $Ak ^= $Ak;
-        }
+        Util::wipe($Ek);
+        Util::wipe($nonce);
+        Util::wipe($x);
+        Util::wipe($Ak);
         return Base64UrlSafe::encodeUnpadded($t . $edk . $c);
     }
 
@@ -163,17 +162,10 @@ class PKEv1 implements PKEInterface
             OPENSSL_NO_PADDING | OPENSSL_RAW_DATA,
             $nonce
         );
-        try {
-            sodium_memzero($Ek);
-            sodium_memzero($nonce);
-            sodium_memzero($x);
-            sodium_memzero($Ak);
-        } catch (\SodiumException $ex) {
-            $Ek ^= $Ek;
-            $nonce ^= $nonce;
-            $x ^= $x;
-            $Ak ^= $Ak;
-        }
+        Util::wipe($Ek);
+        Util::wipe($nonce);
+        Util::wipe($x);
+        Util::wipe($Ak);
         return new SymmetricKey($ptk, new Version1());
     }
 }
