@@ -3,15 +3,19 @@ declare(strict_types=1);
 
 namespace ParagonIE\Paserk\Operations\Wrap;
 
-use ParagonIE\ConstantTime\Base64;
-use ParagonIE\ConstantTime\Base64UrlSafe;
-use ParagonIE\ConstantTime\Binary;
+use ParagonIE\ConstantTime\{
+    Base64,
+    Base64UrlSafe,
+    Binary
+};
 use ParagonIE\Paserk\Operations\WrapInterface;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Util;
 use ParagonIE\Paseto\KeyInterface;
-use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
-use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\Keys\{
+    AsymmetricSecretKey,
+    SymmetricKey
+};
 use ParagonIE\Paseto\ProtocolInterface;
 use ParagonIE\Paseto\Protocol\{
     Version1,
@@ -19,6 +23,8 @@ use ParagonIE\Paseto\Protocol\{
     Version3,
     Version4
 };
+use Exception;
+use SodiumException;
 
 /**
  * Class Pie
@@ -72,7 +78,7 @@ class Pie implements WrapInterface
      * @param string $header
      * @param KeyInterface $key
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     protected function wrapKeyV1V3(string $header, KeyInterface $key): string
     {
@@ -81,12 +87,14 @@ class Pie implements WrapInterface
 
         // Step 2:
         $x = hash_hmac('sha384', "\x80" . $n, $this->wrappingKey->raw(), true);
+        /// @SPEC DETAIL:                 ^ must be 0x80
         $Ek = Binary::safeSubstr($x, 0, 32);
         $n2 = Binary::safeSubstr($x, 32, 16);
 
         // Step 3:
         $Ak = Binary::safeSubstr(
             hash_hmac('sha384', "\x81" . $n, $this->wrappingKey->raw(), true),
+            /// @SPEC DETAIL:             ^ must be 0x81
             0,
             32
         );
@@ -99,6 +107,7 @@ class Pie implements WrapInterface
             OPENSSL_RAW_DATA | OPENSSL_NO_PADDING,
             $n2
         );
+        /// @SPEC DETAIL: Must use (Ek, n2)
 
         // Step 5:
         $t = hash_hmac(
@@ -107,6 +116,7 @@ class Pie implements WrapInterface
             $Ak,
             true
         );
+        /// @SPEC DETAIL: Must cover h || c || t, in that order.
 
         // Wipe keys from memory after use:
         try {
@@ -114,7 +124,7 @@ class Pie implements WrapInterface
             sodium_memzero($n2);
             sodium_memzero($x);
             sodium_memzero($Ak);
-        } catch (\SodiumException $ex) {
+        } catch (SodiumException $ex) {
             $Ek ^= $Ek;
             $n2 ^= $n2;
             $x ^= $x;
@@ -123,6 +133,7 @@ class Pie implements WrapInterface
 
         // Step 6:
         return Base64UrlSafe::encodeUnpadded($t . $n . $c);
+        /// @SPEC DETAIL: Must return t || n || c (in that order)
     }
 
     /**
@@ -137,14 +148,18 @@ class Pie implements WrapInterface
 
         // Step 2:
         $x = sodium_crypto_generichash("\x80" . $n, $this->wrappingKey->raw(), 56);
+        /// @SPEC DETAIL:               ^ Must be 0x80
+        /// @SPEC DETAIL: Length MUST be 56 bytes
         $Ek = Binary::safeSubstr($x, 0, 32);
         $n2 = Binary::safeSubstr($x, 32, 24);
 
         // Step 3:
         $Ak = sodium_crypto_generichash("\x81" . $n, $this->wrappingKey->raw());
+        /// @SPEC DETAIL:                ^ Must be 0x81
 
         // Step 4:
         $c = sodium_crypto_stream_xchacha20_xor($key->raw(), $n2, $Ek);
+        /// @SPEC DETAIL: Must use (Ek, n2)
 
         // Step 5:
         $t = sodium_crypto_generichash($header . $n . $c, $Ak);
@@ -155,7 +170,7 @@ class Pie implements WrapInterface
             sodium_memzero($n2);
             sodium_memzero($x);
             sodium_memzero($Ak);
-        } catch (\SodiumException $ex) {
+        } catch (SodiumException $ex) {
             $Ek ^= $Ek;
             $n2 ^= $n2;
             $x ^= $x;
@@ -163,6 +178,7 @@ class Pie implements WrapInterface
         }
 
         return Base64UrlSafe::encodeUnpadded($t . $n . $c);
+        /// @SPEC DETAIL: Must return t || n || c (in that order)
     }
 
 
@@ -171,6 +187,7 @@ class Pie implements WrapInterface
      * @return KeyInterface
      *
      * @throws PaserkException
+     * @throws Exception
      */
     public function unwrapKey(string $wrapped): KeyInterface
     {
@@ -221,12 +238,16 @@ class Pie implements WrapInterface
         // Step 1:
         $decoded = Base64UrlSafe::decode($encoded);
         $t = Binary::safeSubstr($decoded,  0, 48);
+        /// @SPEC DETAIL: The first 48 bytes will be `t`
         $n = Binary::safeSubstr($decoded, 48, 32);
+        /// @SPEC DETAIL: The next 32 bytes will be the nonce `n`
         $c = Binary::safeSubstr($decoded, 80);
+        /// @SPEC DETAIL: The remaining bytes will be the wrapped key
 
         // Step 2:
         $Ak = Binary::safeSubstr(
             hash_hmac('sha384', "\x81" . $n, $this->wrappingKey->raw(), true),
+            /// @SPEC DETAIL:             ^ Must be 0x81
             0,
             32
         );
@@ -243,9 +264,11 @@ class Pie implements WrapInterface
         if (!hash_equals($t2, $t)) {
             throw new PaserkException('Invalid authentication tag');
         }
+        /// @SPEC DETAIL: Must be a constant-time comparison.
 
         // Step 5:
         $x = hash_hmac('sha384', "\x80" . $n, $this->wrappingKey->raw(), true);
+        /// @SPEC DETAIL:                  ^ Must be 0x80
         $Ek = Binary::safeSubstr($x, 0, 32);
         $n2 = Binary::safeSubstr($x, 32, 16);
 
@@ -264,7 +287,7 @@ class Pie implements WrapInterface
             sodium_memzero($n2);
             sodium_memzero($x);
             sodium_memzero($Ak);
-        } catch (\SodiumException $ex) {
+        } catch (SodiumException $ex) {
             $Ek ^= $Ek;
             $n2 ^= $n2;
             $x ^= $x;
@@ -279,18 +302,22 @@ class Pie implements WrapInterface
      * @return string
      *
      * @throws PaserkException
-     * @throws \SodiumException
+     * @throws SodiumException
      */
     protected function unwrapKeyV2V4(string $header, string $encoded): string
     {
         // Step 1:
         $decoded = Base64UrlSafe::decode($encoded);
         $t = Binary::safeSubstr($decoded,  0, 32);
+        /// @SPEC DETAIL: The first 32 bytes will be `t`
         $n = Binary::safeSubstr($decoded, 32, 32);
+        /// @SPEC DETAIL: The next 32 bytes will be the nonce `n`
         $c = Binary::safeSubstr($decoded, 64);
+        /// @SPEC DETAIL: The remaining bytes will be the wrapped key
 
         // Step 2:
         $Ak = sodium_crypto_generichash("\x81" . $n, $this->wrappingKey->raw());
+        /// @SPEC DETAIL:                ^ Must be 0x81
 
         // Step 3:
         $t2 = sodium_crypto_generichash($header . $n . $c, $Ak);
@@ -299,9 +326,11 @@ class Pie implements WrapInterface
         if (!hash_equals($t2, $t)) {
             throw new PaserkException('Invalid authentication tag');
         }
+        /// @SPEC DETAIL: Must be a constant-time comparison.
 
         // Step 5:
         $x = sodium_crypto_generichash("\x80" . $n, $this->wrappingKey->raw(), 56);
+        /// @SPEC DETAIL:               ^ Must be 0x80
         $Ek = Binary::safeSubstr($x, 0, 32);
         $n2 = Binary::safeSubstr($x, 32, 24);
 
@@ -313,7 +342,7 @@ class Pie implements WrapInterface
             sodium_memzero($n2);
             sodium_memzero($x);
             sodium_memzero($Ak);
-        } catch (\SodiumException $ex) {
+        } catch (SodiumException $ex) {
             $Ek ^= $Ek;
             $n2 ^= $n2;
             $x ^= $x;
