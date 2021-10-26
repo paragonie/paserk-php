@@ -14,6 +14,12 @@ use ParagonIE\Paserk\Operations\PBKW\{
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paseto\ProtocolInterface;
 
+use function
+    array_pop,
+    explode,
+    hash_equals,
+    implode;
+
 /**
  * Class PBKW
  * @package ParagonIE\Paserk\Operations

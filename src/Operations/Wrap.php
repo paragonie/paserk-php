@@ -6,6 +6,7 @@ use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Util;
 use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 use ParagonIE\Paseto\Keys\SymmetricKey;
+use TypeError;
 
 /**
  * Class Wrap
@@ -46,7 +47,7 @@ class Wrap
     {
         $unwrapped = $this->wrapper->unwrapKey($key);
         if (!($unwrapped instanceof SymmetricKey)) {
-            throw new \TypeError('Invalid type returned from unwrapKey()');
+            throw new TypeError('Invalid type returned from unwrapKey()');
         }
         return $unwrapped;
     }
@@ -72,7 +73,7 @@ class Wrap
     {
         $unwrapped = $this->wrapper->unwrapKey($key);
         if (!($unwrapped instanceof AsymmetricSecretKey)) {
-            throw new \TypeError('Invalid type returned from unwrapKey()');
+            throw new TypeError('Invalid type returned from unwrapKey()');
         }
         return $unwrapped;
     }

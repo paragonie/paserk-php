@@ -2,16 +2,32 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Operations\PBKW;
 
-use ParagonIE\ConstantTime\Base64UrlSafe;
-use ParagonIE\ConstantTime\Binary;
+use ParagonIE\ConstantTime\{
+    Base64UrlSafe,
+    Binary
+};
 use ParagonIE\HiddenString\HiddenString;
 use ParagonIE\Paserk\Operations\PBKWInterface;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paseto\KeyInterface;
-use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
-use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\Keys\{
+    AsymmetricSecretKey,
+    SymmetricKey
+};
 use ParagonIE\Paseto\Protocol\Version1;
 use ParagonIE\Paseto\ProtocolInterface;
+use Exception;
+use TypeError;
+use function
+    hash,
+    hash_equals,
+    hash_hmac,
+    hash_pbkdf2,
+    openssl_decrypt,
+    openssl_encrypt,
+    pack,
+    random_bytes,
+    unpack;
 
 /**
  * Class PBKWv1
@@ -49,6 +65,7 @@ class PBKWv1 implements PBKWInterface
      * @param array $options
      * @return string
      *
+     * @throws Exception
      * @throws PaserkException
      */
     public function wrapWithPassword(
@@ -74,15 +91,17 @@ class PBKWv1 implements PBKWInterface
 
         // Step 3:
         $Ek = Binary::safeSubstr(hash('sha384', "\xff" . $preKey, true), 0, 32);
+        /// @SPEC DETAIL:                                 ^ Must be prefixed with 0xFF
 
         // Step 4:
         $Ak = hash('sha384', "\xfe" . $preKey, true);
+        /// @SPEC DETAIL:              ^ Must be prefixed with 0xFE
 
         // Step 5:
         $nonce = random_bytes(16);
 
         // Step 6:
-        $edk = \openssl_encrypt(
+        $edk = openssl_encrypt(
             $key->raw(),
             'aes-256-ctr',
             $Ek,
@@ -137,6 +156,7 @@ class PBKWv1 implements PBKWInterface
 
         // Step 2:
         $Ak = hash('sha384', "\xfe" . $preKey, true);
+        /// @SPEC DETAIL:              ^ Must be prefixed with 0xFE
 
         // Step 3:
         $t2 = hash_hmac(
@@ -153,8 +173,9 @@ class PBKWv1 implements PBKWInterface
 
         // Step 5:
         $Ek = Binary::safeSubstr(hash('sha384', "\xff" . $preKey, true), 0, 32);
+        /// @SPEC DETAIL:                                 ^ Must be prefixed with 0xFF
 
-        $ptk = \openssl_decrypt(
+        $ptk = openssl_decrypt(
             $edk,
             'aes-256-ctr',
             $Ek,
@@ -167,6 +188,6 @@ class PBKWv1 implements PBKWInterface
         if (hash_equals($header, static::secretHeader())) {
             return new AsymmetricSecretKey($ptk, static::getProtocol());
         }
-        throw new \TypeError();
+        throw new TypeError();
     }
 }

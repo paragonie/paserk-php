@@ -45,6 +45,7 @@ class PKE
         if (!hash_equals($pk->getProtocol()::header(), $this->version::header())) {
             throw new PaserkException('Wrapping key is not intended for this version');
         }
+        /// @SPEC DETAIL: Algorithm Lucidity enforcement.
 
         $sealer = $this->getSealer();
         return $sealer::header() . $sealer->seal($ptk, $pk);
@@ -65,10 +66,6 @@ class PKE
                 return new PKEv3();
             case 'v4':
                 return new PKEv4();
-            /*
-            case 'v3':
-                return $this->sealV3($ptk, $pk);
-            */
             default:
                 throw new PaserkException(
                     'Unknown version: ' . $this->version::header()
@@ -88,6 +85,7 @@ class PKE
         if (!hash_equals($sk->getProtocol()::header(), $this->version::header())) {
             throw new PaserkException('Unwrapping key is not intended for this version');
         }
+        /// @SPEC DETAIL: Algorithm Lucidity enforcement.
         $pieces = explode('.', $paserk);
         if (count($pieces) !== 3) {
             throw new PaserkException('Invalid PASERK');

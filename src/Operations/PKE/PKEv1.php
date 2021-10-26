@@ -18,6 +18,15 @@ use ParagonIE\Paseto\Protocol\Version1;
 use ParagonIE\Paserk\Util;
 use phpseclib\Crypt\RSA;
 use Exception;
+use function
+    hash,
+    hash_equals,
+    hash_hmac,
+    openssl_decrypt,
+    openssl_encrypt,
+    pack,
+    random_bytes,
+    unpack;
 
 /**
  * Class PKEv1
@@ -49,12 +58,14 @@ class PKEv1 implements PKEInterface
         if ($bitLength !== 4096) {
             throw new PaserkException('Public key modulus must be 4096 bits in size');
         }
+        /// @SPEC DETAIL: n > 2^4095 and n < (2^4096 + 1)
         $exp = (int) $rsa->exponent->toString();
         if ($exp !== 65537) {
             throw new PaserkException('Public key exponent must be 65537');
         }
+        /// @SPEC DETAIL: e == 65537
 
-        // We're using RSA-KEM
+        // We're using RSA-KEM, which means we work with unpadded RSA
         $rsa->setEncryptionMode(RSA::ENCRYPTION_NONE);
 
         // Step 1:
@@ -73,6 +84,8 @@ class PKEv1 implements PKEInterface
             hash('sha384', $c, true),
             true
         );
+        /// @SPEC DETAIL: Prefix must be 0x01 for encryption keys
+
         $Ek = Binary::safeSubstr($x, 0, 32);
         $nonce = Binary::safeSubstr($x, 32, 16);
 
@@ -83,6 +96,7 @@ class PKEv1 implements PKEInterface
             hash('sha384', $c, true),
             true
         );
+        /// @SPEC DETAIL: Prefix must be 0x02 for authentication keys
 
         // Step 5:
         $edk = openssl_encrypt(
@@ -94,6 +108,7 @@ class PKEv1 implements PKEInterface
         );
 
         $t = hash_hmac('sha384', self::header() . $c . $edk, $Ak, true);
+        /// @SPEC DETAIL: header || c || edk, in that order
 
         Util::wipe($Ek);
         Util::wipe($nonce);
@@ -135,6 +150,7 @@ class PKEv1 implements PKEInterface
             hash('sha384', $c, true),
             true
         );
+        /// @SPEC DETAIL: Prefix must be 0x02 for authentication keys
 
         // Step 3:
         $t2 = hash_hmac('sha384', self::header() . $c . $edk, $Ak, true);
@@ -143,6 +159,7 @@ class PKEv1 implements PKEInterface
         if (!hash_equals($t2, $tag)) {
             throw new PaserkException('Invalid auth tag');
         }
+        /// @SPEC DETAIL: This must be a constant-time compare.
 
         // Step 5:
         $x = hash_hmac(
@@ -151,11 +168,12 @@ class PKEv1 implements PKEInterface
             hash('sha384', $c, true),
             true
         );
+        /// @SPEC DETAIL: Prefix must be 0x01 for encryption keys
         $Ek = Binary::safeSubstr($x, 0, 32);
         $nonce = Binary::safeSubstr($x, 32, 16);
 
         // Step 6:
-        $ptk = openssl_encrypt(
+        $ptk = openssl_decrypt(
             $edk,
             'aes-256-ctr',
             $Ek,

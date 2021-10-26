@@ -22,6 +22,12 @@ use ParagonIE\Paserk\Util;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\Protocol\Version3;
 use Exception;
+use function
+    hash,
+    hash_equals,
+    hash_hmac,
+    openssl_decrypt,
+    openssl_encrypt;
 
 /**
  * Class PKEv3
@@ -69,6 +75,7 @@ class PKEv3 implements PKEInterface
             "\x01" . $header . $xk . $eph_pk_compressed . $pk_compressed,
             true
         );
+        /// @SPEC DETAIL: Prefix must be 0x01 for encryption keys
         $Ek = Binary::safeSubstr($tmp, 0, 32);
         $nonce = Binary::safeSubstr($tmp, 32, 16);
 
@@ -78,9 +85,10 @@ class PKEv3 implements PKEInterface
             "\x02" . $header . $xk . $eph_pk_compressed . $pk_compressed,
             true
         );
+        /// @SPEC DETAIL: Prefix must be 0x02 for authentication keys
 
         // Step 5:
-        $edk = \openssl_encrypt(
+        $edk = openssl_encrypt(
             $ptk->raw(),
             'aes-256-ctr',
             $Ek,
@@ -95,6 +103,7 @@ class PKEv3 implements PKEInterface
             $Ak,
             true
         );
+        /// @SPEC DETAIL: h || epk || edk
 
         Util::wipe($tmp);
         Util::wipe($Ek);
@@ -141,6 +150,7 @@ class PKEv3 implements PKEInterface
             "\x02" . $header . $xk . $eph_pk_compressed . $pk_compressed,
             true
         );
+        /// @SPEC DETAIL: Prefix must be 0x02 for authentication keys
 
         // Step 3:
         $t2 = hash_hmac(
@@ -149,11 +159,13 @@ class PKEv3 implements PKEInterface
             $Ak,
             true
         );
+        /// @SPEC DETAIL: h || epk || edk
 
         // Step 4:
         if (!hash_equals($t2, $tag)) {
             throw new PaserkException('Invalid auth tag');
         }
+        /// @SPEC DETAIL: This must be a constant-time compare.
 
         // Step 5:
         $tmp = hash(
@@ -161,11 +173,12 @@ class PKEv3 implements PKEInterface
             "\x01" . $header . $xk . $eph_pk_compressed . $pk_compressed,
             true
         );
+        /// @SPEC DETAIL: Prefix must be 0x01 for encryption keys
         $Ek = Binary::safeSubstr($tmp, 0, 32);
         $nonce = Binary::safeSubstr($tmp, 32, 16);
 
         // Step 6:
-        $ptk = openssl_encrypt(
+        $ptk = openssl_decrypt(
             $edk,
             'aes-256-ctr',
             $Ek,

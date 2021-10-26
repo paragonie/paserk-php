@@ -15,6 +15,16 @@ use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Util;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use SodiumException;
+use function
+    hash_equals,
+    sodium_crypto_box_keypair,
+    sodium_crypto_box_publickey,
+    sodium_crypto_box_secretkey,
+    sodium_crypto_generichash,
+    sodium_crypto_scalarmult,
+    sodium_crypto_sign_ed25519_sk_to_curve25519,
+    sodium_crypto_sign_ed25519_pk_to_curve25519,
+    sodium_crypto_stream_xchacha20_xor;
 
 /**
  * Class PKEv2v4
@@ -57,9 +67,11 @@ class PKEv2 implements PKEInterface
         $Ek = sodium_crypto_generichash(
             "\x01" . $header . $xk . $eph_pk . $xpk
         );
+        /// @SPEC DETAIL: Prefix is 0x01 for encryption keys
         $Ak = sodium_crypto_generichash(
             "\x02" . $header . $xk . $eph_pk . $xpk
         );
+        /// @SPEC DETAIL: Prefix is 0x02 for authentication keys
         $nonce = sodium_crypto_generichash($eph_pk . $xpk, '', 24);
 
         $edk = sodium_crypto_stream_xchacha20_xor(
@@ -68,6 +80,7 @@ class PKEv2 implements PKEInterface
             $Ek
         );
         $tag = sodium_crypto_generichash($header . $eph_pk . $edk, $Ak);
+        /// @SPEC DETAIL: h || epk || edk, in that order
         Util::wipe($Ek);
         Util::wipe($nonce);
         Util::wipe($xk);
@@ -107,19 +120,23 @@ class PKEv2 implements PKEInterface
         $Ak = sodium_crypto_generichash(
             "\x02" . $header . $xk . $eph_pk . $xpk
         );
+        /// @SPEC DETAIL: Prefix is 0x02 for authentication keys
 
         // Step 4:
         $t2 = sodium_crypto_generichash($header . $eph_pk . $edk, $Ak);
+        /// @SPEC DETAIL: h || epk || edk
 
         // Step 5:
         if (!hash_equals($t2, $tag)) {
             throw new PaserkException('Invalid auth tag');
         }
+        /// @SPEC DETAIL: This must be a constant-time compare.
 
         // Step 6:
         $Ek = sodium_crypto_generichash(
             "\x01" . $header . $xk . $eph_pk . $xpk
         );
+        /// @SPEC DETAIL: Prefix is 0x01 for encryption keys
         // Step 7:
         $nonce = sodium_crypto_generichash($eph_pk . $xpk, '', 24);
 

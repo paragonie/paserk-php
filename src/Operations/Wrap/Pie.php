@@ -25,6 +25,17 @@ use ParagonIE\Paseto\Protocol\{
 };
 use Exception;
 use SodiumException;
+use function
+    array_slice,
+    chunk_split,
+    explode,
+    hash_equals,
+    hash_hmac,
+    implode,
+    in_array,
+    openssl_decrypt,
+    openssl_encrypt,
+    random_bytes;
 
 /**
  * Class Pie
@@ -60,6 +71,7 @@ class Pie implements WrapInterface
      * @return string
      *
      * @throws PaserkException
+     * @throws SodiumException
      */
     public function wrapKey(string $header, KeyInterface $key): string
     {
@@ -100,7 +112,7 @@ class Pie implements WrapInterface
         );
 
         // Step 4:
-        $c = \openssl_encrypt(
+        $c = openssl_encrypt(
             $key->raw(),
             'aes-256-ctr',
             $Ek,
@@ -262,7 +274,7 @@ class Pie implements WrapInterface
         $n2 = Binary::safeSubstr($x, 32, 16);
 
         // Step 6:
-        $ptk = \openssl_decrypt(
+        $ptk = openssl_decrypt(
             $c,
             'aes-256-ctr',
             $Ek,
