@@ -10,6 +10,9 @@ use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\PaserkTypeInterface;
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\SymmetricKey;
+use function
+    array_key_exists,
+    is_null;
 
 /**
  * Class Seal
@@ -57,6 +60,8 @@ class Seal implements PaserkTypeInterface
         $unsealed = (new PKE($this->sk->getProtocol()))
             ->unseal($paserk, $this->sk);
         $this->throwIfInvalidProtocol($unsealed->getProtocol());
+        /// @SPEC DETAIL: Algorithm Lucidity
+
         return $unsealed;
     }
 
@@ -72,6 +77,8 @@ class Seal implements PaserkTypeInterface
             throw new PaserkException('Only symmetric keys are allowed here');
         }
         $this->throwIfInvalidProtocol($key->getProtocol());
+        /// @SPEC DETAIL: Algorithm Lucidity
+
         $localId = (new Local())->encode($key);
         if (!array_key_exists($localId, $this->localCache)) {
             $pke = new PKE($this->pk->getProtocol());

@@ -2,8 +2,10 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk;
 
-use ParagonIE\ConstantTime\Base64UrlSafe;
-use ParagonIE\ConstantTime\Binary;
+use ParagonIE\ConstantTime\{
+    Base64UrlSafe,
+    Binary
+};
 use ParagonIE\Paserk\Types\{
     Lid,
     Pid
@@ -15,6 +17,9 @@ use ParagonIE\Paseto\Protocol\{
     Version4
 };
 use ParagonIE\Paseto\ProtocolInterface;
+use function
+    hash,
+    sodium_crypto_generichash;
 
 /**
  * Trait IdCommonTrait

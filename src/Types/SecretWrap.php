@@ -8,8 +8,11 @@ use ParagonIE\Paserk\Operations\Wrap;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\PaserkTypeInterface;
 use ParagonIE\Paseto\KeyInterface;
-use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
-use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\Keys\{
+    AsymmetricSecretKey,
+    SymmetricKey
+};
+use function array_key_exists;
 
 /**
  * Class SecretWrap
@@ -44,10 +47,16 @@ class SecretWrap implements PaserkTypeInterface
         return new self(new Wrap(new Pie($key)));
     }
 
+    /**
+     * @param string $paserk
+     * @return KeyInterface
+     * @throws PaserkException
+     */
     public function decode(string $paserk): KeyInterface
     {
         $unwrapped = $this->wrap->secretUnwrap($paserk);
         $this->throwIfInvalidProtocol($unwrapped->getProtocol());
+        /// @SPEC DETAIL: Algorithm Lucidity
         return $unwrapped;
     }
 
@@ -62,6 +71,7 @@ class SecretWrap implements PaserkTypeInterface
             throw new PaserkException('Only asymmetric secret keys are allowed here');
         }
         $this->throwIfInvalidProtocol($key->getProtocol());
+        /// @SPEC DETAIL: Algorithm Lucidity
         $secretId = (new SecretType())->encode($key);
         if (!array_key_exists($secretId, $this->localCache)) {
             $this->localCache[$secretId] = $this->wrap->secretWrap($key);

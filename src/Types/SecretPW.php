@@ -11,6 +11,10 @@ use ParagonIE\Paserk\Util;
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 
+use function
+    array_key_exists,
+    explode;
+
 /**
  * Class SecretPW
  * @package ParagonIE\Paserk\Types
@@ -52,6 +56,8 @@ class SecretPW implements PaserkTypeInterface
         $header = $pieces[0];
         $version = Util::getPasetoVersion($header);
         $this->throwIfInvalidProtocol($version);
+        /// @SPEC DETAIL: Algorithm Lucidity
+
         $pbkw = PBKW::forVersion($version);
 
         return $pbkw->secretPwUnwrap($paserk, $this->password);
@@ -68,6 +74,8 @@ class SecretPW implements PaserkTypeInterface
             throw new PaserkException('Only asymmetric secret keys are allowed here');
         }
         $this->throwIfInvalidProtocol($key->getProtocol());
+        /// @SPEC DETAIL: Algorithm Lucidity
+
         $secretId = (new SecretType())->encode($key);
         if (!array_key_exists($secretId, $this->localCache)) {
             $this->localCache[$secretId] = PBKW::forVersion($key->getProtocol())

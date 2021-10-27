@@ -4,8 +4,10 @@ namespace ParagonIE\Paserk\Operations;
 
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Util;
-use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
-use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\Keys\{
+    AsymmetricSecretKey,
+    SymmetricKey
+};
 use TypeError;
 
 /**

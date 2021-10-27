@@ -9,6 +9,10 @@ use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\PaserkTypeInterface;
 use ParagonIE\Paserk\Util;
+use function
+    count,
+    explode,
+    implode;
 
 /**
  * Class Local
@@ -30,6 +34,8 @@ class Local implements PaserkTypeInterface
             throw new PaserkException('Only symmetric keys can be serialized as kx.local.');
         }
         $this->throwIfInvalidProtocol($key->getProtocol());
+        /// @SPEC DETAIL: Algorithm Lucidity
+
         $version = Util::getPaserkHeader($key->getProtocol());
         return implode('.', [$version, self::getTypeLabel(), $key->encode()]);
     }
@@ -51,6 +57,8 @@ class Local implements PaserkTypeInterface
         }
         $version = Util::getPasetoVersion($pieces[0]);
         $this->throwIfInvalidProtocol($version);
+        /// @SPEC DETAIL: Algorithm Lucidity
+
         return new SymmetricKey(
             Base64UrlSafe::decode($pieces[2]),
             $version

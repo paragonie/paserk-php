@@ -15,6 +15,11 @@ use ParagonIE\Paserk\Operations\Key\{
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\ProtocolInterface;
+use function
+    array_pop,
+    count,
+    explode,
+    implode;
 
 /**
  * Class PKE
