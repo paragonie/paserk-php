@@ -2,16 +2,34 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Operations\PBKW;
 
-use ParagonIE\ConstantTime\Base64UrlSafe;
-use ParagonIE\ConstantTime\Binary;
+use ParagonIE\ConstantTime\{
+    Base64UrlSafe,
+    Binary
+};
 use ParagonIE\HiddenString\HiddenString;
-use ParagonIE\Paserk\Operations\PBKWInterface;
+use ParagonIE\Paserk\Operations\{
+    PBKW,
+    PBKWInterface
+};
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paseto\KeyInterface;
-use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
-use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\Keys\{
+    AsymmetricSecretKey,
+    SymmetricKey
+};
 use ParagonIE\Paseto\Protocol\Version2;
 use ParagonIE\Paseto\ProtocolInterface;
+use Exception;
+use SodiumException;
+use TypeError;
+use function
+    hash_equals,
+    sodium_crypto_generichash,
+    sodium_crypto_pwhash,
+    sodium_crypto_stream_xchacha20_xor,
+    pack,
+    random_bytes,
+    unpack;
 
 /**
  * Class PBKWv2
@@ -49,8 +67,9 @@ class PBKWv2 implements PBKWInterface
      * @param array $options
      * @return string
      *
+     * @throws Exception
      * @throws PaserkException
-     * @throws \SodiumException
+     * @throws SodiumException
      */
     public function wrapWithPassword(
         KeyInterface $key,
@@ -85,10 +104,12 @@ class PBKWv2 implements PBKWInterface
         );
 
         // Step 3:
-        $Ek = sodium_crypto_generichash("\xFF" . $preKey);
+        $Ek = sodium_crypto_generichash(PBKW::DOMAIN_SEPARATION_ENCRYPT . $preKey);
+        /// @SPEC DETAIL:                ^ Must be prefixed with 0xFF for encryption
 
         // Step 4:
-        $Ak = sodium_crypto_generichash("\xFE" . $preKey);
+        $Ak = sodium_crypto_generichash(PBKW::DOMAIN_SEPARATION_AUTH . $preKey);
+        /// @SPEC DETAIL:                ^ Must be prefixed with 0xFE for authentication
 
         // Step 5:
         $nonce = random_bytes(24);
@@ -106,6 +127,7 @@ class PBKWv2 implements PBKWInterface
             $Ak
         );
 
+        // Step 8:
         return Base64UrlSafe::encodeUnpadded(
             $salt . $memPack . $opsPack . $paraPack . $nonce . $edk . $tag
         );
@@ -116,6 +138,11 @@ class PBKWv2 implements PBKWInterface
      * @param string $wrapped
      * @param HiddenString $password
      * @return KeyInterface
+     *
+     * @throws Exception
+     * @throws PaserkException
+     * @throws SodiumException
+     * @throws TypeError
      */
     public function unwrapWithPassword(
         string $header,
@@ -135,8 +162,12 @@ class PBKWv2 implements PBKWInterface
         $mem = unpack('J', $memPack)[1];
         $ops = unpack('N', $opsPack)[1];
         // Parallelism is not used in PHP, but we still store it as p=1
+        if (!hash_equals($paraPack, "\x00\x00\x00\x01")) {
+            // Fail fast if an invalid parameter is provided
+            throw new PaserkException("Parallelism > 1 is not supported in PHP");
+        }
 
-        // Step 1:
+        // Step 2:
         $preKey = sodium_crypto_pwhash(
             32,
             $password->getString(),
@@ -146,36 +177,40 @@ class PBKWv2 implements PBKWInterface
             SODIUM_CRYPTO_PWHASH_ALG_ARGON2ID13
         );
 
-        // Step 2:
-        $Ak = sodium_crypto_generichash("\xFE" . $preKey);
-
         // Step 3:
+        $Ak = sodium_crypto_generichash(PBKW::DOMAIN_SEPARATION_AUTH . $preKey);
+        /// @SPEC DETAIL:                ^ Must be prefixed with 0xFE for authentication
+
+        // Step 4:
         $t2 = sodium_crypto_generichash(
             $header . $salt . $memPack . $opsPack . $paraPack . $nonce . $edk,
             $Ak
         );
 
-        // Step 4:
+        // Step 5:
         if (!hash_equals($t2, $tag)) {
             throw new PaserkException('Invalid password or wrapped key');
         }
-
-        // Step 5:
-        $Ek = sodium_crypto_generichash("\xFF" . $preKey);
+        /// @SPEC DETAIL: This check must be constant-time.
 
         // Step 6:
+        $Ek = sodium_crypto_generichash(PBKW::DOMAIN_SEPARATION_ENCRYPT . $preKey);
+        /// @SPEC DETAIL:                ^ Must be prefixed with 0xFF for encryption
+
+        // Step 7:
         $ptk = sodium_crypto_stream_xchacha20_xor(
             $edk,
             $nonce,
             $Ek
         );
 
+        // Step 8:
         if (hash_equals($header, static::localHeader())) {
             return new SymmetricKey($ptk, static::getProtocol());
         }
         if (hash_equals($header, static::secretHeader())) {
             return new AsymmetricSecretKey($ptk, static::getProtocol());
         }
-        throw new \TypeError();
+        throw new TypeError();
     }
 }

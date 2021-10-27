@@ -1,20 +1,37 @@
 <?php
 declare(strict_types=1);
-
 namespace ParagonIE\Paserk\Operations\PKE;
 
-use ParagonIE\ConstantTime\Base64UrlSafe;
-use ParagonIE\ConstantTime\Binary;
-use ParagonIE\ConstantTime\Hex;
-use ParagonIE\EasyECC\EasyECC;
-use ParagonIE\EasyECC\ECDSA\PublicKey;
-use ParagonIE\EasyECC\ECDSA\SecretKey;
-use ParagonIE\Paserk\Operations\Key\SealingPublicKey;
-use ParagonIE\Paserk\Operations\Key\SealingSecretKey;
-use ParagonIE\Paserk\Operations\PKEInterface;
+use ParagonIE\ConstantTime\{
+    Base64UrlSafe,
+    Binary,
+    Hex
+};
+use ParagonIE\EasyECC\{
+    EasyECC,
+    ECDSA\PublicKey,
+    ECDSA\SecretKey
+};
+use ParagonIE\Paseto\ProtocolInterface;
+use ParagonIE\Paserk\Operations\Key\{
+    SealingPublicKey,
+    SealingSecretKey
+};
+use ParagonIE\Paserk\Operations\{
+    PKE,
+    PKEInterface
+};
 use ParagonIE\Paserk\PaserkException;
+use ParagonIE\Paserk\Util;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\Protocol\Version3;
+use Exception;
+use function
+    hash,
+    hash_equals,
+    hash_hmac,
+    openssl_decrypt,
+    openssl_encrypt;
 
 /**
  * Class PKEv3
@@ -22,6 +39,8 @@ use ParagonIE\Paseto\Protocol\Version3;
  */
 class PKEv3 implements PKEInterface
 {
+    use PKETrait;
+
     /**
      * @return string
      */
@@ -31,12 +50,21 @@ class PKEv3 implements PKEInterface
     }
 
     /**
+     * @return ProtocolInterface
+     */
+    public static function getProtocol(): ProtocolInterface
+    {
+        return new Version3();
+    }
+
+    /**
      * @link https://github.com/paseto-standard/paserk/blob/master/operations/PKE.md#v3-encryption
      *
      * @param SymmetricKey $ptk
      * @param SealingPublicKey $pk
      * @return string
-     * @throws \Exception
+     *
+     * @throws Exception
      */
     public function seal(SymmetricKey $ptk, SealingPublicKey $pk): string
     {
@@ -44,6 +72,7 @@ class PKEv3 implements PKEInterface
         $easyECC = new EasyECC('P384');
 
         // Step 1:
+        $this->assertKeyVersion($pk);
         $eph_sk = SecretKey::generate('P384');
         /** @var PublicKey $eph_pk */
         $eph_pk = $eph_sk->getPublicKey();
@@ -58,21 +87,23 @@ class PKEv3 implements PKEInterface
         // Step 3:
         $tmp = hash(
             'sha384',
-            "\x01" . $header . $xk . $eph_pk_compressed . $pk_compressed,
+            PKE::DOMAIN_SEPARATION_ENCRYPT . $header . $xk . $eph_pk_compressed . $pk_compressed,
             true
         );
+        /// @SPEC DETAIL: Prefix must be 0x01 for encryption keys
         $Ek = Binary::safeSubstr($tmp, 0, 32);
         $nonce = Binary::safeSubstr($tmp, 32, 16);
 
         // Step 4:
         $Ak = hash(
             'sha384',
-            "\x02" . $header . $xk . $eph_pk_compressed . $pk_compressed,
+            PKE::DOMAIN_SEPARATION_AUTH . $header . $xk . $eph_pk_compressed . $pk_compressed,
             true
         );
+        /// @SPEC DETAIL: Prefix must be 0x02 for authentication keys
 
         // Step 5:
-        $edk = \openssl_encrypt(
+        $edk = openssl_encrypt(
             $ptk->raw(),
             'aes-256-ctr',
             $Ek,
@@ -87,19 +118,13 @@ class PKEv3 implements PKEInterface
             $Ak,
             true
         );
+        /// @SPEC DETAIL: h || epk || edk
 
-        try {
-            sodium_memzero($tmp);
-            sodium_memzero($Ek);
-            sodium_memzero($nonce);
-            sodium_memzero($xk);
-            sodium_memzero($Ak);
-        } catch (\SodiumException $ex) {
-            $Ek ^= $Ek;
-            $nonce ^= $nonce;
-            $xk ^= $xk;
-            $Ak ^= $Ak;
-        }
+        Util::wipe($tmp);
+        Util::wipe($Ek);
+        Util::wipe($nonce);
+        Util::wipe($xk);
+        Util::wipe($Ak);
 
         // Step 7:
         return Base64UrlSafe::encodeUnpadded($tag . $eph_pk_compressed . $edk);
@@ -114,17 +139,19 @@ class PKEv3 implements PKEInterface
      * @return SymmetricKey
      *
      * @throws PaserkException
+     * @throws Exception
      */
     public function unseal(string $header, string $encoded, SealingSecretKey $sk): SymmetricKey
     {
         if (!hash_equals($header, self::header())) {
             throw new PaserkException('Header mismatch');
         }
+        $this->assertKeyVersion($sk);
+
         $bin = Base64UrlSafe::decode($encoded);
         $tag = Binary::safeSubstr($bin, 0, 48);
         $eph_pk_compressed = Binary::safeSubstr($bin, 48, 49);
         $edk = Binary::safeSubstr($bin, 97);
-
 
         // Step 1:
         $easyECC = new EasyECC('P384');
@@ -137,9 +164,10 @@ class PKEv3 implements PKEInterface
         // Step 2:
         $Ak = hash(
             'sha384',
-            "\x02" . $header . $xk . $eph_pk_compressed . $pk_compressed,
+            PKE::DOMAIN_SEPARATION_AUTH . $header . $xk . $eph_pk_compressed . $pk_compressed,
             true
         );
+        /// @SPEC DETAIL: Prefix must be 0x02 for authentication keys
 
         // Step 3:
         $t2 = hash_hmac(
@@ -148,23 +176,28 @@ class PKEv3 implements PKEInterface
             $Ak,
             true
         );
+        /// @SPEC DETAIL: h || epk || edk
 
         // Step 4:
         if (!hash_equals($t2, $tag)) {
+            Util::wipe($t2);
+            Util::wipe($Ak);
             throw new PaserkException('Invalid auth tag');
         }
+        /// @SPEC DETAIL: This must be a constant-time compare.
 
         // Step 5:
         $tmp = hash(
             'sha384',
-            "\x01" . $header . $xk . $eph_pk_compressed . $pk_compressed,
+            PKE::DOMAIN_SEPARATION_ENCRYPT . $header . $xk . $eph_pk_compressed . $pk_compressed,
             true
         );
+        /// @SPEC DETAIL: Prefix must be 0x01 for encryption keys
         $Ek = Binary::safeSubstr($tmp, 0, 32);
         $nonce = Binary::safeSubstr($tmp, 32, 16);
 
         // Step 6:
-        $ptk = openssl_encrypt(
+        $ptk = openssl_decrypt(
             $edk,
             'aes-256-ctr',
             $Ek,
@@ -172,18 +205,12 @@ class PKEv3 implements PKEInterface
             $nonce
         );
 
-        try {
-            sodium_memzero($tmp);
-            sodium_memzero($Ek);
-            sodium_memzero($nonce);
-            sodium_memzero($xk);
-            sodium_memzero($Ak);
-        } catch (\SodiumException $ex) {
-            $Ek ^= $Ek;
-            $nonce ^= $nonce;
-            $xk ^= $xk;
-            $Ak ^= $Ak;
-        }
+        Util::wipe($tmp);
+        Util::wipe($Ek);
+        Util::wipe($nonce);
+        Util::wipe($xk);
+        Util::wipe($Ak);
+        Util::wipe($t2);
 
         // Step 7:
         return new SymmetricKey($ptk, new Version3());

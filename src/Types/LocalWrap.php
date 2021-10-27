@@ -9,6 +9,7 @@ use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\PaserkTypeInterface;
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\SymmetricKey;
+use function array_key_exists;
 
 /**
  * Class LocalWrap
@@ -50,6 +51,8 @@ class LocalWrap implements PaserkTypeInterface
     {
         $out = $this->wrap->localUnwrap($paserk);
         $this->throwIfInvalidProtocol($out->getProtocol());
+        /// @SPEC DETAIL: Algorithm Lucidity
+
         return $out;
     }
 
@@ -64,6 +67,8 @@ class LocalWrap implements PaserkTypeInterface
             throw new PaserkException('Only symmetric keys are allowed here');
         }
         $this->throwIfInvalidProtocol($key->getProtocol());
+        /// @SPEC DETAIL: Algorithm Lucidity
+
         $localId = (new Local())->encode($key);
         if (!array_key_exists($localId, $this->localCache)) {
             $this->localCache[$localId] = $this->wrap->localWrap($key);

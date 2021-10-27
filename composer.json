@@ -21,11 +21,12 @@
   },
   "require": {
     "php": "^7.1|^8",
+    "ext-gmp": "*",
     "ext-json": "*",
     "ext-openssl": "*",
     "paragonie/easy-ecc": "^0.5",
     "paragonie/hidden-string": "^1|^2",
-    "paragonie/paseto": ">=2.1.1"
+    "paragonie/paseto": ">=2.2"
   },
   "require-dev": {
     "phpunit/phpunit": "^7|^8|^9",

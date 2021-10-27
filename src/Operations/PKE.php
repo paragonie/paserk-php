@@ -15,7 +15,11 @@ use ParagonIE\Paserk\Operations\Key\{
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\ProtocolInterface;
-
+use function
+    array_pop,
+    count,
+    explode,
+    implode;
 
 /**
  * Class PKE
@@ -23,6 +27,9 @@ use ParagonIE\Paseto\ProtocolInterface;
  */
 class PKE
 {
+    const DOMAIN_SEPARATION_ENCRYPT = "\x01";
+    const DOMAIN_SEPARATION_AUTH = "\x02";
+
     /** @var ProtocolInterface $version */
     protected $version;
 
@@ -46,6 +53,7 @@ class PKE
         if (!hash_equals($pk->getProtocol()::header(), $this->version::header())) {
             throw new PaserkException('Wrapping key is not intended for this version');
         }
+        /// @SPEC DETAIL: Algorithm Lucidity enforcement.
 
         $sealer = $this->getSealer();
         return $sealer::header() . $sealer->seal($ptk, $pk);
@@ -66,10 +74,6 @@ class PKE
                 return new PKEv3();
             case 'v4':
                 return new PKEv4();
-            /*
-            case 'v3':
-                return $this->sealV3($ptk, $pk);
-            */
             default:
                 throw new PaserkException(
                     'Unknown version: ' . $this->version::header()
@@ -86,6 +90,7 @@ class PKE
      */
     public function unseal(string $paserk, SealingSecretKey $sk): SymmetricKey
     {
+        // Step 1:
         if (!hash_equals($sk->getProtocol()::header(), $this->version::header())) {
             throw new PaserkException('Unwrapping key is not intended for this version');
         }

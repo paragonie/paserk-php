@@ -2,16 +2,36 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Operations\PBKW;
 
-use ParagonIE\ConstantTime\Base64UrlSafe;
-use ParagonIE\ConstantTime\Binary;
+use ParagonIE\ConstantTime\{
+    Base64UrlSafe,
+    Binary
+};
 use ParagonIE\HiddenString\HiddenString;
-use ParagonIE\Paserk\Operations\PBKWInterface;
+use ParagonIE\Paserk\Util;
+use ParagonIE\Paserk\Operations\{
+    PBKW,
+    PBKWInterface
+};
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paseto\KeyInterface;
-use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
-use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\Keys\{
+    AsymmetricSecretKey,
+    SymmetricKey
+};
 use ParagonIE\Paseto\Protocol\Version1;
 use ParagonIE\Paseto\ProtocolInterface;
+use Exception;
+use TypeError;
+use function
+    hash,
+    hash_equals,
+    hash_hmac,
+    hash_pbkdf2,
+    openssl_decrypt,
+    openssl_encrypt,
+    pack,
+    random_bytes,
+    unpack;
 
 /**
  * Class PBKWv1
@@ -49,6 +69,7 @@ class PBKWv1 implements PBKWInterface
      * @param array $options
      * @return string
      *
+     * @throws Exception
      * @throws PaserkException
      */
     public function wrapWithPassword(
@@ -73,16 +94,26 @@ class PBKWv1 implements PBKWInterface
         $preKey = hash_pbkdf2('sha384', $password->getString(), $salt, $iterations, 32, true);
 
         // Step 3:
-        $Ek = Binary::safeSubstr(hash('sha384', "\xff" . $preKey, true), 0, 32);
+        $Ek = Binary::safeSubstr(
+            hash(
+                'sha384',
+                PBKW::DOMAIN_SEPARATION_ENCRYPT . $preKey,
+                true
+            ),
+            0,
+            32
+        );
+        /// @SPEC DETAIL: Must be prefixed with 0xFF
 
         // Step 4:
-        $Ak = hash('sha384', "\xfe" . $preKey, true);
+        $Ak = hash('sha384', PBKW::DOMAIN_SEPARATION_AUTH . $preKey, true);
+        /// @SPEC DETAIL:              ^ Must be prefixed with 0xFE
 
         // Step 5:
         $nonce = random_bytes(16);
 
         // Step 6:
-        $edk = \openssl_encrypt(
+        $edk = openssl_encrypt(
             $key->raw(),
             'aes-256-ctr',
             $Ek,
@@ -132,13 +163,14 @@ class PBKWv1 implements PBKWInterface
 
         $iterations = unpack('N', $iterPack)[1];
 
-        // Step 1:
+        // Step 2:
         $preKey = hash_pbkdf2('sha384', $password->getString(), $salt, $iterations, 32, true);
 
-        // Step 2:
-        $Ak = hash('sha384', "\xfe" . $preKey, true);
-
         // Step 3:
+        $Ak = hash('sha384', PBKW::DOMAIN_SEPARATION_AUTH . $preKey, true);
+        /// @SPEC DETAIL:              ^ Must be prefixed with 0xFE
+
+        // Step 4:
         $t2 = hash_hmac(
             'sha384',
             $header . $salt . $iterPack . $nonce . $edk,
@@ -146,27 +178,38 @@ class PBKWv1 implements PBKWInterface
             true
         );
 
-        // Step 4:
+        // Step 5:
         if (!hash_equals($t2, $tag)) {
+            Util::wipe($t2);
+            Util::wipe($Ak);
             throw new PaserkException('Invalid password or wrapped key');
         }
+        /// @SPEC DETAIL: This check must be constant-time.
 
-        // Step 5:
-        $Ek = Binary::safeSubstr(hash('sha384', "\xff" . $preKey, true), 0, 32);
+        // Step 6:
+        $Ek = Binary::safeSubstr(
+            hash('sha384', PBKW::DOMAIN_SEPARATION_ENCRYPT . $preKey, true),
+            0,
+            32
+        );
+        /// @SPEC DETAIL: Must be prefixed with 0xFF
 
-        $ptk = \openssl_decrypt(
+        // Step 7:
+        $ptk = openssl_decrypt(
             $edk,
             'aes-256-ctr',
             $Ek,
             OPENSSL_RAW_DATA | OPENSSL_NO_PADDING,
             $nonce
         );
+
+        // Step 8:
         if (hash_equals($header, static::localHeader())) {
             return new SymmetricKey($ptk, static::getProtocol());
         }
         if (hash_equals($header, static::secretHeader())) {
             return new AsymmetricSecretKey($ptk, static::getProtocol());
         }
-        throw new \TypeError();
+        throw new TypeError();
     }
 }

@@ -14,12 +14,21 @@ use ParagonIE\Paserk\Operations\PBKW\{
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paseto\ProtocolInterface;
 
+use function
+    array_pop,
+    explode,
+    hash_equals,
+    implode;
+
 /**
  * Class PBKW
  * @package ParagonIE\Paserk\Operations
  */
 class PBKW
 {
+    const DOMAIN_SEPARATION_ENCRYPT = "\xff";
+    const DOMAIN_SEPARATION_AUTH = "\xfe";
+
     /** @var PBKWInterface $wrapper */
     protected $wrapper;
 
@@ -84,6 +93,7 @@ class PBKW
         $payload = array_pop($pieces);
 
         $header = implode('.', $pieces) . '.';
+        // Step 1: Algorithm lucidity
         $expect = $this->wrapper::localHeader();
         if (!hash_equals($expect, $header)) {
             throw new PaserkException('Invalid wrapped key');
@@ -132,6 +142,7 @@ class PBKW
         $payload = array_pop($pieces);
 
         $header = implode('.', $pieces) . '.';
+        // Step 1: Algorithm lucidity
         $expect = $this->wrapper::secretHeader();
         if (!hash_equals($expect, $header)) {
             throw new PaserkException('Invalid wrapped key');
