@@ -11,7 +11,10 @@ use ParagonIE\Paserk\Operations\Key\{
     SealingPublicKey,
     SealingSecretKey
 };
-use ParagonIE\Paserk\Operations\PKEInterface;
+use ParagonIE\Paserk\Operations\{
+    PKE,
+    PKEInterface
+};
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\Protocol\Version1;
@@ -80,7 +83,7 @@ class PKEv1 implements PKEInterface
         // Step 3:
         $x = hash_hmac(
             'sha384',
-            "\x01" . self::header() . $r,
+            PKE::DOMAIN_SEPARATION_ENCRYPT . self::header() . $r,
             hash('sha384', $c, true),
             true
         );
@@ -92,7 +95,7 @@ class PKEv1 implements PKEInterface
         // Step 4:
         $Ak = hash_hmac(
             'sha384',
-            "\x02" . self::header() . $r,
+            PKE::DOMAIN_SEPARATION_AUTH . self::header() . $r,
             hash('sha384', $c, true),
             true
         );
@@ -146,7 +149,7 @@ class PKEv1 implements PKEInterface
         // Step 2:
         $Ak = hash_hmac(
             'sha384',
-            "\x02" . self::header() . $r,
+            PKE::DOMAIN_SEPARATION_AUTH . self::header() . $r,
             hash('sha384', $c, true),
             true
         );
@@ -157,6 +160,8 @@ class PKEv1 implements PKEInterface
 
         // Step 4:
         if (!hash_equals($t2, $tag)) {
+            Util::wipe($t2);
+            Util::wipe($Ak);
             throw new PaserkException('Invalid auth tag');
         }
         /// @SPEC DETAIL: This must be a constant-time compare.
@@ -164,7 +169,7 @@ class PKEv1 implements PKEInterface
         // Step 5:
         $x = hash_hmac(
             'sha384',
-            "\x01" . self::header() . $r,
+            PKE::DOMAIN_SEPARATION_ENCRYPT . self::header() . $r,
             hash('sha384', $c, true),
             true
         );
@@ -184,6 +189,8 @@ class PKEv1 implements PKEInterface
         Util::wipe($nonce);
         Util::wipe($x);
         Util::wipe($Ak);
+        Util::wipe($t2);
+
         return new SymmetricKey($ptk, new Version1());
     }
 }

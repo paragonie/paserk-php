@@ -10,7 +10,10 @@ use ParagonIE\Paserk\Operations\Key\{
     SealingPublicKey,
     SealingSecretKey
 };
-use ParagonIE\Paserk\Operations\PKEInterface;
+use ParagonIE\Paserk\Operations\{
+    PKE,
+    PKEInterface
+};
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Util;
 use ParagonIE\Paseto\Keys\SymmetricKey;
@@ -65,11 +68,11 @@ class PKEv2 implements PKEInterface
 
         // Step 4:
         $Ek = sodium_crypto_generichash(
-            "\x01" . $header . $xk . $eph_pk . $xpk
+            PKE::DOMAIN_SEPARATION_ENCRYPT . $header . $xk . $eph_pk . $xpk
         );
         /// @SPEC DETAIL: Prefix is 0x01 for encryption keys
         $Ak = sodium_crypto_generichash(
-            "\x02" . $header . $xk . $eph_pk . $xpk
+            PKE::DOMAIN_SEPARATION_AUTH . $header . $xk . $eph_pk . $xpk
         );
         /// @SPEC DETAIL: Prefix is 0x02 for authentication keys
         $nonce = sodium_crypto_generichash($eph_pk . $xpk, '', 24);
@@ -118,7 +121,7 @@ class PKEv2 implements PKEInterface
 
         // Step 3:
         $Ak = sodium_crypto_generichash(
-            "\x02" . $header . $xk . $eph_pk . $xpk
+            PKE::DOMAIN_SEPARATION_AUTH . $header . $xk . $eph_pk . $xpk
         );
         /// @SPEC DETAIL: Prefix is 0x02 for authentication keys
 
@@ -128,13 +131,15 @@ class PKEv2 implements PKEInterface
 
         // Step 5:
         if (!hash_equals($t2, $tag)) {
+            Util::wipe($t2);
+            Util::wipe($Ak);
             throw new PaserkException('Invalid auth tag');
         }
         /// @SPEC DETAIL: This must be a constant-time compare.
 
         // Step 6:
         $Ek = sodium_crypto_generichash(
-            "\x01" . $header . $xk . $eph_pk . $xpk
+            PKE::DOMAIN_SEPARATION_ENCRYPT . $header . $xk . $eph_pk . $xpk
         );
         /// @SPEC DETAIL: Prefix is 0x01 for encryption keys
         // Step 7:

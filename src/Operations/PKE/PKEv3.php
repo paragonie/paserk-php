@@ -16,7 +16,10 @@ use ParagonIE\Paserk\Operations\Key\{
     SealingPublicKey,
     SealingSecretKey
 };
-use ParagonIE\Paserk\Operations\PKEInterface;
+use ParagonIE\Paserk\Operations\{
+    PKE,
+    PKEInterface
+};
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Util;
 use ParagonIE\Paseto\Keys\SymmetricKey;
@@ -72,7 +75,7 @@ class PKEv3 implements PKEInterface
         // Step 3:
         $tmp = hash(
             'sha384',
-            "\x01" . $header . $xk . $eph_pk_compressed . $pk_compressed,
+            PKE::DOMAIN_SEPARATION_ENCRYPT . $header . $xk . $eph_pk_compressed . $pk_compressed,
             true
         );
         /// @SPEC DETAIL: Prefix must be 0x01 for encryption keys
@@ -82,7 +85,7 @@ class PKEv3 implements PKEInterface
         // Step 4:
         $Ak = hash(
             'sha384',
-            "\x02" . $header . $xk . $eph_pk_compressed . $pk_compressed,
+            PKE::DOMAIN_SEPARATION_AUTH . $header . $xk . $eph_pk_compressed . $pk_compressed,
             true
         );
         /// @SPEC DETAIL: Prefix must be 0x02 for authentication keys
@@ -147,7 +150,7 @@ class PKEv3 implements PKEInterface
         // Step 2:
         $Ak = hash(
             'sha384',
-            "\x02" . $header . $xk . $eph_pk_compressed . $pk_compressed,
+            PKE::DOMAIN_SEPARATION_AUTH . $header . $xk . $eph_pk_compressed . $pk_compressed,
             true
         );
         /// @SPEC DETAIL: Prefix must be 0x02 for authentication keys
@@ -163,6 +166,8 @@ class PKEv3 implements PKEInterface
 
         // Step 4:
         if (!hash_equals($t2, $tag)) {
+            Util::wipe($t2);
+            Util::wipe($Ak);
             throw new PaserkException('Invalid auth tag');
         }
         /// @SPEC DETAIL: This must be a constant-time compare.
@@ -170,7 +175,7 @@ class PKEv3 implements PKEInterface
         // Step 5:
         $tmp = hash(
             'sha384',
-            "\x01" . $header . $xk . $eph_pk_compressed . $pk_compressed,
+            PKE::DOMAIN_SEPARATION_ENCRYPT . $header . $xk . $eph_pk_compressed . $pk_compressed,
             true
         );
         /// @SPEC DETAIL: Prefix must be 0x01 for encryption keys
@@ -191,6 +196,7 @@ class PKEv3 implements PKEInterface
         Util::wipe($nonce);
         Util::wipe($xk);
         Util::wipe($Ak);
+        Util::wipe($t2);
 
         // Step 7:
         return new SymmetricKey($ptk, new Version3());

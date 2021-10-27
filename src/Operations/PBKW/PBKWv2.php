@@ -7,7 +7,10 @@ use ParagonIE\ConstantTime\{
     Binary
 };
 use ParagonIE\HiddenString\HiddenString;
-use ParagonIE\Paserk\Operations\PBKWInterface;
+use ParagonIE\Paserk\Operations\{
+    PBKW,
+    PBKWInterface
+};
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\{
@@ -101,11 +104,11 @@ class PBKWv2 implements PBKWInterface
         );
 
         // Step 3:
-        $Ek = sodium_crypto_generichash("\xFF" . $preKey);
+        $Ek = sodium_crypto_generichash(PBKW::DOMAIN_SEPARATION_ENCRYPT . $preKey);
         /// @SPEC DETAIL:                ^ Must be prefixed with 0xFF for encryption
 
         // Step 4:
-        $Ak = sodium_crypto_generichash("\xFE" . $preKey);
+        $Ak = sodium_crypto_generichash(PBKW::DOMAIN_SEPARATION_AUTH . $preKey);
         /// @SPEC DETAIL:                ^ Must be prefixed with 0xFE for authentication
 
         // Step 5:
@@ -174,7 +177,7 @@ class PBKWv2 implements PBKWInterface
         );
 
         // Step 2:
-        $Ak = sodium_crypto_generichash("\xFE" . $preKey);
+        $Ak = sodium_crypto_generichash(PBKW::DOMAIN_SEPARATION_AUTH . $preKey);
         /// @SPEC DETAIL:                ^ Must be prefixed with 0xFE for authentication
 
         // Step 3:
@@ -189,7 +192,7 @@ class PBKWv2 implements PBKWInterface
         }
 
         // Step 5:
-        $Ek = sodium_crypto_generichash("\xFF" . $preKey);
+        $Ek = sodium_crypto_generichash(PBKW::DOMAIN_SEPARATION_ENCRYPT . $preKey);
         /// @SPEC DETAIL:                ^ Must be prefixed with 0xFF for encryption
 
         // Step 6:

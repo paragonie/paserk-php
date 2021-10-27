@@ -27,6 +27,9 @@ use function
  */
 class PKE
 {
+    const DOMAIN_SEPARATION_ENCRYPT = "\x01";
+    const DOMAIN_SEPARATION_AUTH = "\x02";
+
     /** @var ProtocolInterface $version */
     protected $version;
 

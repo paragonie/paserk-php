@@ -7,7 +7,11 @@ use ParagonIE\ConstantTime\{
     Binary
 };
 use ParagonIE\HiddenString\HiddenString;
-use ParagonIE\Paserk\Operations\PBKWInterface;
+use ParagonIE\Paserk\Util;
+use ParagonIE\Paserk\Operations\{
+    PBKW,
+    PBKWInterface
+};
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\{
@@ -90,11 +94,19 @@ class PBKWv1 implements PBKWInterface
         $preKey = hash_pbkdf2('sha384', $password->getString(), $salt, $iterations, 32, true);
 
         // Step 3:
-        $Ek = Binary::safeSubstr(hash('sha384', "\xff" . $preKey, true), 0, 32);
-        /// @SPEC DETAIL:                                 ^ Must be prefixed with 0xFF
+        $Ek = Binary::safeSubstr(
+            hash(
+                'sha384',
+                PBKW::DOMAIN_SEPARATION_ENCRYPT . $preKey,
+                true
+            ),
+            0,
+            32
+        );
+        /// @SPEC DETAIL: Must be prefixed with 0xFF
 
         // Step 4:
-        $Ak = hash('sha384', "\xfe" . $preKey, true);
+        $Ak = hash('sha384', PBKW::DOMAIN_SEPARATION_AUTH . $preKey, true);
         /// @SPEC DETAIL:              ^ Must be prefixed with 0xFE
 
         // Step 5:
@@ -155,7 +167,7 @@ class PBKWv1 implements PBKWInterface
         $preKey = hash_pbkdf2('sha384', $password->getString(), $salt, $iterations, 32, true);
 
         // Step 2:
-        $Ak = hash('sha384', "\xfe" . $preKey, true);
+        $Ak = hash('sha384', PBKW::DOMAIN_SEPARATION_AUTH . $preKey, true);
         /// @SPEC DETAIL:              ^ Must be prefixed with 0xFE
 
         // Step 3:
@@ -168,12 +180,18 @@ class PBKWv1 implements PBKWInterface
 
         // Step 4:
         if (!hash_equals($t2, $tag)) {
+            Util::wipe($t2);
+            Util::wipe($Ak);
             throw new PaserkException('Invalid password or wrapped key');
         }
 
         // Step 5:
-        $Ek = Binary::safeSubstr(hash('sha384', "\xff" . $preKey, true), 0, 32);
-        /// @SPEC DETAIL:                                 ^ Must be prefixed with 0xFF
+        $Ek = Binary::safeSubstr(
+            hash('sha384', PBKW::DOMAIN_SEPARATION_ENCRYPT . $preKey, true),
+            0,
+            32
+        );
+        /// @SPEC DETAIL: Must be prefixed with 0xFF
 
         $ptk = openssl_decrypt(
             $edk,

@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-
 namespace ParagonIE\Paserk\Operations\Wrap;
 
 use ParagonIE\ConstantTime\{
@@ -45,6 +44,9 @@ use function
  */
 class Pie implements WrapInterface
 {
+    const DOMAIN_SEPARATION_ENCRYPT = "\x80";
+    const DOMAIN_SEPARATION_AUTH = "\x81";
+
     /** @var SymmetricKey $wrappingKey */
     protected $wrappingKey;
 
@@ -98,14 +100,14 @@ class Pie implements WrapInterface
         $n = random_bytes(32);
 
         // Step 2:
-        $x = hash_hmac('sha384', "\x80" . $n, $this->wrappingKey->raw(), true);
+        $x = hash_hmac('sha384', self::DOMAIN_SEPARATION_ENCRYPT . $n, $this->wrappingKey->raw(), true);
         /// @SPEC DETAIL:                 ^ must be 0x80
         $Ek = Binary::safeSubstr($x, 0, 32);
         $n2 = Binary::safeSubstr($x, 32, 16);
 
         // Step 3:
         $Ak = Binary::safeSubstr(
-            hash_hmac('sha384', "\x81" . $n, $this->wrappingKey->raw(), true),
+            hash_hmac('sha384', self::DOMAIN_SEPARATION_AUTH . $n, $this->wrappingKey->raw(), true),
             /// @SPEC DETAIL:             ^ must be 0x81
             0,
             32
@@ -155,14 +157,14 @@ class Pie implements WrapInterface
         $n = random_bytes(32);
 
         // Step 2:
-        $x = sodium_crypto_generichash("\x80" . $n, $this->wrappingKey->raw(), 56);
+        $x = sodium_crypto_generichash(self::DOMAIN_SEPARATION_ENCRYPT . $n, $this->wrappingKey->raw(), 56);
         /// @SPEC DETAIL:               ^ Must be 0x80
         /// @SPEC DETAIL: Length MUST be 56 bytes
         $Ek = Binary::safeSubstr($x, 0, 32);
         $n2 = Binary::safeSubstr($x, 32, 24);
 
         // Step 3:
-        $Ak = sodium_crypto_generichash("\x81" . $n, $this->wrappingKey->raw());
+        $Ak = sodium_crypto_generichash(self::DOMAIN_SEPARATION_AUTH . $n, $this->wrappingKey->raw());
         /// @SPEC DETAIL:                ^ Must be 0x81
 
         // Step 4:
@@ -247,7 +249,7 @@ class Pie implements WrapInterface
 
         // Step 2:
         $Ak = Binary::safeSubstr(
-            hash_hmac('sha384', "\x81" . $n, $this->wrappingKey->raw(), true),
+            hash_hmac('sha384', self::DOMAIN_SEPARATION_AUTH . $n, $this->wrappingKey->raw(), true),
             /// @SPEC DETAIL:             ^ Must be 0x81
             0,
             32
@@ -268,7 +270,7 @@ class Pie implements WrapInterface
         /// @SPEC DETAIL: Must be a constant-time comparison.
 
         // Step 5:
-        $x = hash_hmac('sha384', "\x80" . $n, $this->wrappingKey->raw(), true);
+        $x = hash_hmac('sha384', self::DOMAIN_SEPARATION_ENCRYPT . $n, $this->wrappingKey->raw(), true);
         /// @SPEC DETAIL:                  ^ Must be 0x80
         $Ek = Binary::safeSubstr($x, 0, 32);
         $n2 = Binary::safeSubstr($x, 32, 16);
@@ -310,7 +312,7 @@ class Pie implements WrapInterface
         /// @SPEC DETAIL: The remaining bytes will be the wrapped key
 
         // Step 2:
-        $Ak = sodium_crypto_generichash("\x81" . $n, $this->wrappingKey->raw());
+        $Ak = sodium_crypto_generichash(self::DOMAIN_SEPARATION_AUTH . $n, $this->wrappingKey->raw());
         /// @SPEC DETAIL:                ^ Must be 0x81
 
         // Step 3:
@@ -323,7 +325,7 @@ class Pie implements WrapInterface
         /// @SPEC DETAIL: Must be a constant-time comparison.
 
         // Step 5:
-        $x = sodium_crypto_generichash("\x80" . $n, $this->wrappingKey->raw(), 56);
+        $x = sodium_crypto_generichash(self::DOMAIN_SEPARATION_ENCRYPT . $n, $this->wrappingKey->raw(), 56);
         /// @SPEC DETAIL:               ^ Must be 0x80
         $Ek = Binary::safeSubstr($x, 0, 32);
         $n2 = Binary::safeSubstr($x, 32, 24);
