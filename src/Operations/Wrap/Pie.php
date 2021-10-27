@@ -8,8 +8,6 @@ use ParagonIE\ConstantTime\{
     Binary,
     Hex
 };
-use Mdanter\Ecc\EccFactory;
-use ParagonIE\EasyECC\ECDSA\ConstantTimeMath;
 use ParagonIE\EasyECC\ECDSA\SecretKey;
 use ParagonIE\Paserk\Operations\WrapInterface;
 use ParagonIE\Paserk\PaserkException;
@@ -94,6 +92,10 @@ class Pie implements WrapInterface
     }
 
     /**
+     * Wrap a key according to the PIE spec. V1/V3
+     *
+     * @ref https://github.com/paseto-standard/paserk/blob/master/operations/Wrap/pie.md#v1v3-encryption
+     *
      * @param string $header
      * @param KeyInterface $key
      * @return string
@@ -119,14 +121,12 @@ class Pie implements WrapInterface
         );
 
         // Step 5:
-        $rawKeyBytes = $key->raw();
-        if ($key->getProtocol() instanceof Version3 && Binary::safeStrlen($rawKeyBytes) > 48) {
-            $rawKeyBytes = Hex::decode(
-                gmp_strval(
-                    SecretKey::importPem($rawKeyBytes)->getSecret(),
-                    16
-                )
-            );
+
+        // This includes some PHP-specific behavior you may not need in other implementations:
+        $rawKeyBytes = '' . $key->raw();
+        if ($key->getProtocol() instanceof Version3 && Binary::safeStrlen($rawKeyBytes) !== 48) {
+            // Get the raw scalar, not a PEM-encoded key
+            $rawKeyBytes = Base64UrlSafe::decode($key->encode());
         }
         $c = openssl_encrypt(
             $rawKeyBytes,
@@ -147,6 +147,7 @@ class Pie implements WrapInterface
         /// @SPEC DETAIL: Must cover h || c || t, in that order.
 
         // Wipe keys from memory after use:
+        Util::wipe($rawKeyBytes);
         Util::wipe($Ek);
         Util::wipe($n2);
         Util::wipe($x);
@@ -158,6 +159,10 @@ class Pie implements WrapInterface
     }
 
     /**
+     * Wrap a key according to the PIE spec. V2/V4
+     *
+     * @ref https://github.com/paseto-standard/paserk/blob/master/operations/Wrap/pie.md#v2v4-encryption
+     *
      * @param string $header
      * @param KeyInterface $key
      * @return string
@@ -199,8 +204,9 @@ class Pie implements WrapInterface
         /// @SPEC DETAIL: Must return t || n || c (in that order)
     }
 
-
     /**
+     * Unwrap a key.
+     *
      * @param string $wrapped
      * @return KeyInterface
      *
@@ -233,12 +239,15 @@ class Pie implements WrapInterface
                 if (Binary::safeStrlen($bytes) < 1600) {
                     throw new PaserkException("Unwrapped RSA secret key is too small");
                 }
+                // If we're here, we have a valid PEM-encoded RSA private key.
             } elseif ($pieces[0] === 'k3' && $pieces[1] === 'secret-wrap') {
                 if (Binary::safeStrlen($bytes) !== 48) {
                     throw new PaserkException("Unwrapped ECDSA secret key must be 48 bytes");
                 }
+                // If we're here, we have a valid ECDSA secret key.
             } elseif (Binary::safeStrlen($bytes) !== 32) {
                 throw new PaserkException("Unwrapped local keys must be 32 bytes");
+                // If we're here, we have a 256-bit symmetric key.
             }
         } elseif (in_array($pieces[0], ['k2', 'k4'], true)) {
             $bytes = $this->unwrapKeyV2V4($header, $pieces[3]);
@@ -246,9 +255,12 @@ class Pie implements WrapInterface
                 if (Binary::safeStrlen($bytes) !== 64) {
                     throw new PaserkException("Unwrapped Ed25519 secret keys must be 64 bytes");
                 }
+                // Ed25519 secret keys are encoded as (seed || pk), as per NaCl/libsodium.
             } elseif (Binary::safeStrlen($bytes) !== 32) {
+                // This condition is only checked for local-wrap tokens
                 throw new PaserkException("Unwrapped local keys must be 32 bytes");
             }
+            // If we're here, we have a valid Ed25519 secret key or 256-bit symmetric key.
         } else {
             throw new PaserkException('Unknown version: ' . $pieces[0]);
         }
@@ -263,6 +275,10 @@ class Pie implements WrapInterface
     }
 
     /**
+     * Unwrap a key according to the PIE spec. V1/V3
+     *
+     * @ref https://github.com/paseto-standard/paserk/blob/master/operations/Wrap/pie.md#v1v3-decryption
+     *
      * @param string $header
      * @param string $encoded
      * @return string
@@ -281,8 +297,13 @@ class Pie implements WrapInterface
 
         // Step 2:
         $Ak = Binary::safeSubstr(
-            hash_hmac('sha384', self::DOMAIN_SEPARATION_AUTH . $n, $this->wrappingKey->raw(), true),
-            /// @SPEC DETAIL:             ^ Must be 0x81
+            hash_hmac(
+                'sha384',
+                self::DOMAIN_SEPARATION_AUTH . $n,
+                $this->wrappingKey->raw(),
+                true
+            ),
+            /// @SPEC DETAIL: Must be 0x81
             0,
             32
         );
@@ -327,6 +348,10 @@ class Pie implements WrapInterface
     }
 
     /**
+     * Unwrap a key according to the PIE spec. V2/V4
+     *
+     * @ref https://github.com/paseto-standard/paserk/blob/master/operations/Wrap/pie.md#v2v4-decryption
+     *
      * @param string $header
      * @param string $encoded
      * @return string
