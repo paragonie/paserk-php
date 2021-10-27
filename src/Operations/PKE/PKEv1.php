@@ -7,6 +7,7 @@ use ParagonIE\ConstantTime\{
     Base64UrlSafe,
     Binary
 };
+use ParagonIE\Paseto\ProtocolInterface;
 use ParagonIE\Paserk\Operations\Key\{
     SealingPublicKey,
     SealingSecretKey
@@ -37,12 +38,22 @@ use function
  */
 class PKEv1 implements PKEInterface
 {
+    use PKETrait;
+
     /**
      * @return string
      */
     public static function header(): string
     {
         return 'k1.seal.';
+    }
+
+    /**
+     * @return ProtocolInterface
+     */
+    public static function getProtocol(): ProtocolInterface
+    {
+        return new Version1();
     }
 
     /**
@@ -132,21 +143,34 @@ class PKEv1 implements PKEInterface
      */
     public function unseal(string $header, string $encoded, SealingSecretKey $sk): SymmetricKey
     {
-        if (!hash_equals($header, self::header())) {
-            throw new PaserkException('Header mismatch');
-        }
         $bin = Base64UrlSafe::decode($encoded);
         $tag = Binary::safeSubstr($bin, 0, 48);
         $edk = Binary::safeSubstr($bin, 48, 32);
         $c = Binary::safeSubstr($bin, 80);
 
         // Step 1:
+        if (!hash_equals($header, self::header())) {
+            throw new PaserkException('Header mismatch');
+        }
         $rsa = Version1::getRsa();
         $rsa->loadKey($sk->raw());
         $rsa->setEncryptionMode(RSA::ENCRYPTION_NONE);
-        $r = $rsa->decrypt($c);
+
+        $bitLength = Binary::safeStrlen($rsa->modulus->toBits());
+        if ($bitLength !== 4096) {
+            throw new PaserkException('Public key modulus must be 4096 bits in size');
+        }
+        /// @SPEC DETAIL: n > 2^4095 and n < (2^4096 + 1)
+        $exp = (int) $rsa->publicExponent->toString();
+        if ($exp !== 65537) {
+            throw new PaserkException('Public key exponent must be 65537');
+        }
+        /// @SPEC DETAIL: e == 65537
 
         // Step 2:
+        $r = $rsa->decrypt($c);
+
+        // Step 3:
         $Ak = hash_hmac(
             'sha384',
             PKE::DOMAIN_SEPARATION_AUTH . self::header() . $r,
@@ -155,10 +179,10 @@ class PKEv1 implements PKEInterface
         );
         /// @SPEC DETAIL: Prefix must be 0x02 for authentication keys
 
-        // Step 3:
+        // Step 4:
         $t2 = hash_hmac('sha384', self::header() . $c . $edk, $Ak, true);
 
-        // Step 4:
+        // Step 5:
         if (!hash_equals($t2, $tag)) {
             Util::wipe($t2);
             Util::wipe($Ak);
@@ -166,7 +190,7 @@ class PKEv1 implements PKEInterface
         }
         /// @SPEC DETAIL: This must be a constant-time compare.
 
-        // Step 5:
+        // Step 6:
         $x = hash_hmac(
             'sha384',
             PKE::DOMAIN_SEPARATION_ENCRYPT . self::header() . $r,
@@ -177,7 +201,7 @@ class PKEv1 implements PKEInterface
         $Ek = Binary::safeSubstr($x, 0, 32);
         $nonce = Binary::safeSubstr($x, 32, 16);
 
-        // Step 6:
+        // Step 7:
         $ptk = openssl_decrypt(
             $edk,
             'aes-256-ctr',
@@ -191,6 +215,7 @@ class PKEv1 implements PKEInterface
         Util::wipe($Ak);
         Util::wipe($t2);
 
+        // Step 8:
         return new SymmetricKey($ptk, new Version1());
     }
 }

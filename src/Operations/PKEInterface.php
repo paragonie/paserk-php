@@ -5,6 +5,7 @@ namespace ParagonIE\Paserk\Operations;
 use ParagonIE\Paserk\Operations\Key\SealingPublicKey;
 use ParagonIE\Paserk\Operations\Key\SealingSecretKey;
 use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\ProtocolInterface;
 
 /**
  * Class PKEInterface
@@ -16,6 +17,11 @@ interface PKEInterface
      * @return string
      */
     public static function header(): string;
+
+    /**
+     * @return ProtocolInterface
+     */
+    public static function getProtocol(): ProtocolInterface;
 
     /**
      * @param SymmetricKey $ptk

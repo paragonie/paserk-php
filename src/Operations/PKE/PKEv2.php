@@ -6,6 +6,10 @@ use ParagonIE\ConstantTime\{
     Base64UrlSafe,
     Binary
 };
+use ParagonIE\Paseto\KeyInterface;
+use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
+use ParagonIE\Paseto\Protocol\Version2;
+use ParagonIE\Paseto\ProtocolInterface;
 use ParagonIE\Paserk\Operations\Key\{
     SealingPublicKey,
     SealingSecretKey
@@ -35,6 +39,8 @@ use function
  */
 class PKEv2 implements PKEInterface
 {
+    use PKETrait;
+
     /**
      * @return string
      */
@@ -44,16 +50,27 @@ class PKEv2 implements PKEInterface
     }
 
     /**
+     * @return ProtocolInterface
+     */
+    public static function getProtocol(): ProtocolInterface
+    {
+        return new Version2();
+    }
+
+    /**
      * @link https://github.com/paseto-standard/paserk/blob/master/operations/PKE.md#v2v4-encryption
      *
      * @param SymmetricKey $ptk
      * @param SealingPublicKey $pk
      * @return string
+     *
+     * @throws PaserkException
      * @throws SodiumException
      */
     public function seal(SymmetricKey $ptk, SealingPublicKey $pk): string
     {
         $header = static::header();
+        $this->assertKeyVersion($pk);
 
         // Step 1:
         $xpk = sodium_crypto_sign_ed25519_pk_to_curve25519($pk->raw());
@@ -104,32 +121,35 @@ class PKEv2 implements PKEInterface
      */
     public function unseal(string $header, string $encoded, SealingSecretKey $sk): SymmetricKey
     {
-        if (!hash_equals($header, static::header())) {
-            throw new PaserkException('Header mismatch');
-        }
         $bin = Base64UrlSafe::decode($encoded);
         $tag = Binary::safeSubstr($bin, 0, 32);
         $eph_pk = Binary::safeSubstr($bin, 32, 32);
         $edk = Binary::safeSubstr($bin, 64, 32);
 
         // Step 1:
+        if (!hash_equals($header, static::header())) {
+            throw new PaserkException('Header mismatch');
+        }
+        $this->assertKeyVersion($sk);
+
+        // Step 2:
         $xsk = sodium_crypto_sign_ed25519_sk_to_curve25519($sk->raw());
         $xpk = sodium_crypto_sign_ed25519_pk_to_curve25519($sk->getPublicKey()->raw());
 
-        // Step 2:
+        // Step 3:
         $xk = sodium_crypto_scalarmult($xsk, $eph_pk);
 
-        // Step 3:
+        // Step 4:
         $Ak = sodium_crypto_generichash(
             PKE::DOMAIN_SEPARATION_AUTH . $header . $xk . $eph_pk . $xpk
         );
         /// @SPEC DETAIL: Prefix is 0x02 for authentication keys
 
-        // Step 4:
+        // Step 5:
         $t2 = sodium_crypto_generichash($header . $eph_pk . $edk, $Ak);
         /// @SPEC DETAIL: h || epk || edk
 
-        // Step 5:
+        // Step 6:
         if (!hash_equals($t2, $tag)) {
             Util::wipe($t2);
             Util::wipe($Ak);
@@ -137,14 +157,16 @@ class PKEv2 implements PKEInterface
         }
         /// @SPEC DETAIL: This must be a constant-time compare.
 
-        // Step 6:
+        // Step 7:
         $Ek = sodium_crypto_generichash(
             PKE::DOMAIN_SEPARATION_ENCRYPT . $header . $xk . $eph_pk . $xpk
         );
         /// @SPEC DETAIL: Prefix is 0x01 for encryption keys
-        // Step 7:
+
+        // Step 8:
         $nonce = sodium_crypto_generichash($eph_pk . $xpk, '', 24);
 
+        // Step 9:
         $ptk = sodium_crypto_stream_xchacha20_xor(
             $edk,
             $nonce,
@@ -155,6 +177,8 @@ class PKEv2 implements PKEInterface
         Util::wipe($xk);
         Util::wipe($xsk);
         Util::wipe($Ak);
+
+        // Step 10:
         return new SymmetricKey($ptk, $sk->getProtocol());
     }
 }

@@ -93,6 +93,7 @@ class PBKW
         $payload = array_pop($pieces);
 
         $header = implode('.', $pieces) . '.';
+        // Step 1: Algorithm lucidity
         $expect = $this->wrapper::localHeader();
         if (!hash_equals($expect, $header)) {
             throw new PaserkException('Invalid wrapped key');
@@ -141,6 +142,7 @@ class PBKW
         $payload = array_pop($pieces);
 
         $header = implode('.', $pieces) . '.';
+        // Step 1: Algorithm lucidity
         $expect = $this->wrapper::secretHeader();
         if (!hash_equals($expect, $header)) {
             throw new PaserkException('Invalid wrapped key');

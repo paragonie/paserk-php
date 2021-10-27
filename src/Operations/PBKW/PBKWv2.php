@@ -127,6 +127,7 @@ class PBKWv2 implements PBKWInterface
             $Ak
         );
 
+        // Step 8:
         return Base64UrlSafe::encodeUnpadded(
             $salt . $memPack . $opsPack . $paraPack . $nonce . $edk . $tag
         );
@@ -166,7 +167,7 @@ class PBKWv2 implements PBKWInterface
             throw new PaserkException("Parallelism > 1 is not supported in PHP");
         }
 
-        // Step 1:
+        // Step 2:
         $preKey = sodium_crypto_pwhash(
             32,
             $password->getString(),
@@ -176,32 +177,34 @@ class PBKWv2 implements PBKWInterface
             SODIUM_CRYPTO_PWHASH_ALG_ARGON2ID13
         );
 
-        // Step 2:
+        // Step 3:
         $Ak = sodium_crypto_generichash(PBKW::DOMAIN_SEPARATION_AUTH . $preKey);
         /// @SPEC DETAIL:                ^ Must be prefixed with 0xFE for authentication
 
-        // Step 3:
+        // Step 4:
         $t2 = sodium_crypto_generichash(
             $header . $salt . $memPack . $opsPack . $paraPack . $nonce . $edk,
             $Ak
         );
 
-        // Step 4:
+        // Step 5:
         if (!hash_equals($t2, $tag)) {
             throw new PaserkException('Invalid password or wrapped key');
         }
+        /// @SPEC DETAIL: This check must be constant-time.
 
-        // Step 5:
+        // Step 6:
         $Ek = sodium_crypto_generichash(PBKW::DOMAIN_SEPARATION_ENCRYPT . $preKey);
         /// @SPEC DETAIL:                ^ Must be prefixed with 0xFF for encryption
 
-        // Step 6:
+        // Step 7:
         $ptk = sodium_crypto_stream_xchacha20_xor(
             $edk,
             $nonce,
             $Ek
         );
 
+        // Step 8:
         if (hash_equals($header, static::localHeader())) {
             return new SymmetricKey($ptk, static::getProtocol());
         }

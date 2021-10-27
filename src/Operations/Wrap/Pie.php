@@ -5,8 +5,12 @@ namespace ParagonIE\Paserk\Operations\Wrap;
 use ParagonIE\ConstantTime\{
     Base64,
     Base64UrlSafe,
-    Binary
+    Binary,
+    Hex
 };
+use Mdanter\Ecc\EccFactory;
+use ParagonIE\EasyECC\ECDSA\ConstantTimeMath;
+use ParagonIE\EasyECC\ECDSA\SecretKey;
 use ParagonIE\Paserk\Operations\WrapInterface;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Util;
@@ -72,6 +76,7 @@ class Pie implements WrapInterface
      * @param KeyInterface $key
      * @return string
      *
+     * @throws Exception
      * @throws PaserkException
      * @throws SodiumException
      */
@@ -96,16 +101,16 @@ class Pie implements WrapInterface
      */
     protected function wrapKeyV1V3(string $header, KeyInterface $key): string
     {
-        // Step 1:
+        // Step 2:
         $n = random_bytes(32);
 
-        // Step 2:
+        // Step 3:
         $x = hash_hmac('sha384', self::DOMAIN_SEPARATION_ENCRYPT . $n, $this->wrappingKey->raw(), true);
         /// @SPEC DETAIL:                 ^ must be 0x80
         $Ek = Binary::safeSubstr($x, 0, 32);
         $n2 = Binary::safeSubstr($x, 32, 16);
 
-        // Step 3:
+        // Step 4:
         $Ak = Binary::safeSubstr(
             hash_hmac('sha384', self::DOMAIN_SEPARATION_AUTH . $n, $this->wrappingKey->raw(), true),
             /// @SPEC DETAIL:             ^ must be 0x81
@@ -113,9 +118,18 @@ class Pie implements WrapInterface
             32
         );
 
-        // Step 4:
+        // Step 5:
+        $rawKeyBytes = $key->raw();
+        if ($key->getProtocol() instanceof Version3 && Binary::safeStrlen($rawKeyBytes) > 48) {
+            $rawKeyBytes = Hex::decode(
+                gmp_strval(
+                    SecretKey::importPem($rawKeyBytes)->getSecret(),
+                    16
+                )
+            );
+        }
         $c = openssl_encrypt(
-            $key->raw(),
+            $rawKeyBytes,
             'aes-256-ctr',
             $Ek,
             OPENSSL_RAW_DATA | OPENSSL_NO_PADDING,
@@ -123,7 +137,7 @@ class Pie implements WrapInterface
         );
         /// @SPEC DETAIL: Must use (Ek, n2)
 
-        // Step 5:
+        // Step 6:
         $t = hash_hmac(
             'sha384',
             $header . $n . $c,
@@ -138,7 +152,7 @@ class Pie implements WrapInterface
         Util::wipe($x);
         Util::wipe($Ak);
 
-        // Step 6:
+        // Step 7:
         return Base64UrlSafe::encodeUnpadded($t . $n . $c);
         /// @SPEC DETAIL: Must return t || n || c (in that order)
     }
@@ -153,25 +167,25 @@ class Pie implements WrapInterface
      */
     protected function wrapKeyV2V4(string $header, KeyInterface $key): string
     {
-        // Step 1:
+        // Step 2:
         $n = random_bytes(32);
 
-        // Step 2:
+        // Step 3:
         $x = sodium_crypto_generichash(self::DOMAIN_SEPARATION_ENCRYPT . $n, $this->wrappingKey->raw(), 56);
         /// @SPEC DETAIL:               ^ Must be 0x80
         /// @SPEC DETAIL: Length MUST be 56 bytes
         $Ek = Binary::safeSubstr($x, 0, 32);
         $n2 = Binary::safeSubstr($x, 32, 24);
 
-        // Step 3:
+        // Step 4:
         $Ak = sodium_crypto_generichash(self::DOMAIN_SEPARATION_AUTH . $n, $this->wrappingKey->raw());
         /// @SPEC DETAIL:                ^ Must be 0x81
 
-        // Step 4:
+        // Step 5:
         $c = sodium_crypto_stream_xchacha20_xor($key->raw(), $n2, $Ek);
         /// @SPEC DETAIL: Must use (Ek, n2)
 
-        // Step 5:
+        // Step 6:
         $t = sodium_crypto_generichash($header . $n . $c, $Ak);
 
         // Wipe keys from memory after use:
@@ -180,6 +194,7 @@ class Pie implements WrapInterface
         Util::wipe($x);
         Util::wipe($Ak);
 
+        // Step 7:
         return Base64UrlSafe::encodeUnpadded($t . $n . $c);
         /// @SPEC DETAIL: Must return t || n || c (in that order)
     }
@@ -194,6 +209,7 @@ class Pie implements WrapInterface
      */
     public function unwrapKey(string $wrapped): KeyInterface
     {
+        // Algorithm Lucidity
         // First, assert the version is correct.
         $pieces = explode('.', $wrapped);
         $version = Util::getPasetoVersion($pieces[0]);
@@ -214,9 +230,25 @@ class Pie implements WrapInterface
                         chunk_split($b64, 64, "\n") .
                         '-----END RSA PRIVATE KEY-----';
                 }
+                if (Binary::safeStrlen($bytes) < 1600) {
+                    throw new PaserkException("Unwrapped RSA secret key is too small");
+                }
+            } elseif ($pieces[0] === 'k3' && $pieces[1] === 'secret-wrap') {
+                if (Binary::safeStrlen($bytes) !== 48) {
+                    throw new PaserkException("Unwrapped ECDSA secret key must be 48 bytes");
+                }
+            } elseif (Binary::safeStrlen($bytes) !== 32) {
+                throw new PaserkException("Unwrapped local keys must be 32 bytes");
             }
         } elseif (in_array($pieces[0], ['k2', 'k4'], true)) {
             $bytes = $this->unwrapKeyV2V4($header, $pieces[3]);
+            if ($pieces[1] === 'secret-wrap') {
+                if (Binary::safeStrlen($bytes) !== 64) {
+                    throw new PaserkException("Unwrapped Ed25519 secret keys must be 64 bytes");
+                }
+            } elseif (Binary::safeStrlen($bytes) !== 32) {
+                throw new PaserkException("Unwrapped local keys must be 32 bytes");
+            }
         } else {
             throw new PaserkException('Unknown version: ' . $pieces[0]);
         }
@@ -265,6 +297,8 @@ class Pie implements WrapInterface
 
         // Step 4:
         if (!hash_equals($t2, $t)) {
+            Util::wipe($t2);
+            Util::wipe($Ak);
             throw new PaserkException('Invalid authentication tag');
         }
         /// @SPEC DETAIL: Must be a constant-time comparison.
@@ -289,7 +323,7 @@ class Pie implements WrapInterface
         Util::wipe($n2);
         Util::wipe($x);
         Util::wipe($Ak);
-        returN $ptk;
+        return $ptk;
     }
 
     /**
@@ -320,6 +354,8 @@ class Pie implements WrapInterface
 
         // Step 4:
         if (!hash_equals($t2, $t)) {
+            Util::wipe($t2);
+            Util::wipe($Ak);
             throw new PaserkException('Invalid authentication tag');
         }
         /// @SPEC DETAIL: Must be a constant-time comparison.

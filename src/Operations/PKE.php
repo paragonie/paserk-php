@@ -90,10 +90,10 @@ class PKE
      */
     public function unseal(string $paserk, SealingSecretKey $sk): SymmetricKey
     {
+        // Step 1:
         if (!hash_equals($sk->getProtocol()::header(), $this->version::header())) {
             throw new PaserkException('Unwrapping key is not intended for this version');
         }
-        /// @SPEC DETAIL: Algorithm Lucidity enforcement.
         $pieces = explode('.', $paserk);
         if (count($pieces) !== 3) {
             throw new PaserkException('Invalid PASERK');

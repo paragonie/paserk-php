@@ -163,14 +163,14 @@ class PBKWv1 implements PBKWInterface
 
         $iterations = unpack('N', $iterPack)[1];
 
-        // Step 1:
+        // Step 2:
         $preKey = hash_pbkdf2('sha384', $password->getString(), $salt, $iterations, 32, true);
 
-        // Step 2:
+        // Step 3:
         $Ak = hash('sha384', PBKW::DOMAIN_SEPARATION_AUTH . $preKey, true);
         /// @SPEC DETAIL:              ^ Must be prefixed with 0xFE
 
-        // Step 3:
+        // Step 4:
         $t2 = hash_hmac(
             'sha384',
             $header . $salt . $iterPack . $nonce . $edk,
@@ -178,14 +178,15 @@ class PBKWv1 implements PBKWInterface
             true
         );
 
-        // Step 4:
+        // Step 5:
         if (!hash_equals($t2, $tag)) {
             Util::wipe($t2);
             Util::wipe($Ak);
             throw new PaserkException('Invalid password or wrapped key');
         }
+        /// @SPEC DETAIL: This check must be constant-time.
 
-        // Step 5:
+        // Step 6:
         $Ek = Binary::safeSubstr(
             hash('sha384', PBKW::DOMAIN_SEPARATION_ENCRYPT . $preKey, true),
             0,
@@ -193,6 +194,7 @@ class PBKWv1 implements PBKWInterface
         );
         /// @SPEC DETAIL: Must be prefixed with 0xFF
 
+        // Step 7:
         $ptk = openssl_decrypt(
             $edk,
             'aes-256-ctr',
@@ -200,6 +202,8 @@ class PBKWv1 implements PBKWInterface
             OPENSSL_RAW_DATA | OPENSSL_NO_PADDING,
             $nonce
         );
+
+        // Step 8:
         if (hash_equals($header, static::localHeader())) {
             return new SymmetricKey($ptk, static::getProtocol());
         }

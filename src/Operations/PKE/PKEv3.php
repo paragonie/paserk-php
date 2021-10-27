@@ -12,6 +12,7 @@ use ParagonIE\EasyECC\{
     ECDSA\PublicKey,
     ECDSA\SecretKey
 };
+use ParagonIE\Paseto\ProtocolInterface;
 use ParagonIE\Paserk\Operations\Key\{
     SealingPublicKey,
     SealingSecretKey
@@ -38,12 +39,22 @@ use function
  */
 class PKEv3 implements PKEInterface
 {
+    use PKETrait;
+
     /**
      * @return string
      */
     public static function header(): string
     {
         return 'k3.seal.';
+    }
+
+    /**
+     * @return ProtocolInterface
+     */
+    public static function getProtocol(): ProtocolInterface
+    {
+        return new Version3();
     }
 
     /**
@@ -61,6 +72,7 @@ class PKEv3 implements PKEInterface
         $easyECC = new EasyECC('P384');
 
         // Step 1:
+        $this->assertKeyVersion($pk);
         $eph_sk = SecretKey::generate('P384');
         /** @var PublicKey $eph_pk */
         $eph_pk = $eph_sk->getPublicKey();
@@ -134,6 +146,8 @@ class PKEv3 implements PKEInterface
         if (!hash_equals($header, self::header())) {
             throw new PaserkException('Header mismatch');
         }
+        $this->assertKeyVersion($sk);
+
         $bin = Base64UrlSafe::decode($encoded);
         $tag = Binary::safeSubstr($bin, 0, 48);
         $eph_pk_compressed = Binary::safeSubstr($bin, 48, 49);
