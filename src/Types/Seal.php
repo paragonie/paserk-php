@@ -10,6 +10,7 @@ use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\PaserkTypeInterface;
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\SymmetricKey;
+use Throwable;
 use function
     array_key_exists,
     is_null;
@@ -44,6 +45,22 @@ class Seal implements PaserkTypeInterface
             $this->sk = $sk;
         }
         $this->localCache = [];
+    }
+
+    /**
+     * @param SealingSecretKey $sk
+     * @return static
+     *
+     * @throws PaserkException
+     */
+    public static function fromSecretKey(SealingSecretKey $sk): self
+    {
+        try {
+            $pk = new SealingPublicKey($sk->getPublicKey()->raw(), $sk->getProtocol());
+            return new self($pk, $sk);
+        } catch (Throwable $ex) {
+            throw new PaserkException("Could not load public key", 0, $ex);
+        }
     }
 
     /**

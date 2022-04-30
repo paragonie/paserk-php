@@ -2,10 +2,16 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Tests\Types;
 
-use ParagonIE\Paserk\Operations\Key\SealingPublicKey;
-use ParagonIE\Paserk\Operations\Key\SealingSecretKey;
-use ParagonIE\Paserk\Types\Lid;
-use ParagonIE\Paserk\Types\Seal;
+use ParagonIE\EasyECC\Exception\NotImplementedException;
+use ParagonIE\Paserk\Operations\Key\{
+    SealingPublicKey,
+    SealingSecretKey
+};
+use ParagonIE\Paserk\PaserkException;
+use ParagonIE\Paserk\Types\{
+    Lid,
+    Seal
+};
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\Protocol\{
     Version1,
@@ -15,6 +21,7 @@ use ParagonIE\Paseto\Protocol\{
 };
 use ParagonIE\Paseto\ProtocolInterface;
 use PHPUnit\Framework\TestCase;
+use SodiumException;
 
 /**
  * Class SealTest
@@ -37,6 +44,11 @@ class SealTest extends TestCase
         ];
     }
 
+    /**
+     * @throws NotImplementedException
+     * @throws PaserkException
+     * @throws SodiumException
+     */
     public function testSeal()
     {
         foreach ($this->versions as $v) {
@@ -52,6 +64,13 @@ class SealTest extends TestCase
             $this->assertSame($lid1, $lid2, 'Key ID must be deterministic');
 
             $unseal = $sealer->decode($sealed);
+            $this->assertSame(
+                $unseal->encode(),
+                $key->encode()
+            );
+
+            $fromSK = Seal::fromSecretKey($sk);
+            $unseal = $fromSK->decode($sealed);
             $this->assertSame(
                 $unseal->encode(),
                 $key->encode()
