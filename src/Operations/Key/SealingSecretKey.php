@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Operations\Key;
 
+use ParagonIE\Paserk\PaserkException;
 use ParagonIE\EasyECC\ECDSA\{
     PublicKey,
     SecretKey
@@ -63,6 +64,22 @@ class SealingSecretKey extends AsymmetricSecretKey
                 sodium_crypto_sign_keypair()
             ),
             $protocol
+        );
+    }
+
+    /**
+     * @return AsymmetricSecretKey
+     * @throws PaserkException
+     */
+    public function toPasetoKey(): AsymmetricSecretKey
+    {
+        if ($this->protocol instanceof Version1) {
+            throw new PaserkException("Version 1 keys cannot be converted!");
+        }
+
+        return new AsymmetricSecretKey(
+            $this->key,
+            $this->protocol
         );
     }
 
