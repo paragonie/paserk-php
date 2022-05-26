@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace ParagonIE\Paserk\Tests\KAT;
 
 use ParagonIE\ConstantTime\Hex;
+use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Tests\KnownAnswers;
 use ParagonIE\Paserk\Types\Lid;
 use ParagonIE\Paseto\Keys\SymmetricKey;
@@ -43,6 +44,15 @@ class LidTest extends KnownAnswers
     {
         foreach ($tests as $test) {
             $localkey = new SymmetricKey(Hex::decode($test['key']), $version);
+            if ($test['expect-fail']) {
+                try {
+                    Lid::encodeLocal($localkey);
+                    $this->fail($test['name'] . ': '. $test['comment']);
+                } catch (PaserkException $ex) {
+                    $this->assertInstanceOf(PaserkException::class, $ex);
+                }
+                continue;
+            }
             $this->assertSame($test['paserk'], Lid::encodeLocal($localkey), $test['name']);
         }
     }

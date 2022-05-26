@@ -59,6 +59,14 @@ class SealTest extends KnownAnswers
                 $pk = new SealingPublicKey(Hex::decode($test['sealing-public-key']), $version);
             }
             $processor = new Seal($pk, $sk);
+            if ($test['expect-fail']) {
+                try {
+                    $processor->decode($test['paserk']);
+                } catch (\Throwable $exception) {
+                    continue;
+                }
+                $this->fail($name . ' > ' . $test['name'] . ': '. $test['comment']);
+            }
             $unsealed = $processor->decode($test['paserk']);
             $this->assertSame(
                 $test['unsealed'],

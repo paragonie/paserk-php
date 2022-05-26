@@ -2,10 +2,7 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
-use ParagonIE\ConstantTime\{
-    Base64,
-    Base64UrlSafe
-};
+use ParagonIE\ConstantTime\{Base64, Base64UrlSafe, Binary};
 use ParagonIE\Paserk\ConstraintTrait;
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
@@ -13,6 +10,8 @@ use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\PaserkTypeInterface;
 use ParagonIE\Paserk\Util;
 use ParagonIE\Paseto\Protocol\Version1;
+use ParagonIE\Paseto\ProtocolCollection;
+use ParagonIE\Paseto\ProtocolInterface;
 use function
     chunk_split,
     count,
@@ -28,6 +27,14 @@ use function
 class PublicType implements PaserkTypeInterface
 {
     use ConstraintTrait;
+
+    public function __construct(ProtocolInterface ...$versions) {
+        if (count($versions) > 0) {
+            $this->collection = new ProtocolCollection(...$versions);
+        } else {
+            $this->collection = ProtocolCollection::default();
+        }
+    }
 
     /**
      * @param string $paserk
@@ -65,6 +72,9 @@ class PublicType implements PaserkTypeInterface
     public function decodeV1(string $encoded): AsymmetricPublicKey
     {
         $raw = Base64UrlSafe::decode($encoded);
+        if (Binary::safeStrlen($raw) < 200) {
+            throw new PaserkException("Public key is too short");
+        }
         $b64 = Base64::encode($raw);
         $pem = '-----BEGIN PUBLIC KEY-----' . "\n" .
             chunk_split($b64, 64, "\n") .
@@ -115,6 +125,10 @@ class PublicType implements PaserkTypeInterface
     {
         $pem = preg_replace('#-{3,}(BEGIN|END) [^-]+-{3,}#', '', $pk);
         $decoded = Base64::decode(preg_replace('#[^A-Za-z0-9+/]#', '', $pem));
+        $length = Binary::safeStrlen($decoded);
+        if ($length < 292) {
+            throw new PaserkException("Public key is too short: {$length}");
+        }
         return Base64UrlSafe::encodeUnpadded($decoded);
     }
 

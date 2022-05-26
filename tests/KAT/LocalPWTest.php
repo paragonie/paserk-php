@@ -52,8 +52,17 @@ class LocalPWTest extends KnownAnswers
         foreach ($tests as $test) {
             $wrapper = new LocalPW(
                 new HiddenString(Hex::encode($test['password'])),
-                $test['options'] ?? []
+                $test['options'] ?? [],
+                $version
             );
+            if ($test['expect-fail']) {
+                try {
+                    $wrapper->decode($test['paserk']);
+                } catch (\Throwable $exception) {
+                    continue;
+                }
+                $this->fail($name . ' > ' . $test['name'] . ': '. $test['comment']);
+            }
             $unwrapped = $wrapper->decode($test['paserk']);
             $this->assertSame(
                 $test['unwrapped'],

@@ -3,12 +3,16 @@ declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
 use ParagonIE\ConstantTime\Base64UrlSafe;
+use ParagonIE\ConstantTime\Binary;
 use ParagonIE\Paserk\ConstraintTrait;
+use ParagonIE\Paseto\Exception\InvalidVersionException;
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\PaserkTypeInterface;
 use ParagonIE\Paserk\Util;
+use ParagonIE\Paseto\ProtocolCollection;
+use ParagonIE\Paseto\ProtocolInterface;
 use function
     count,
     explode,
@@ -23,6 +27,17 @@ class Local implements PaserkTypeInterface
     use ConstraintTrait;
 
     /**
+     * @throws InvalidVersionException
+     */
+    public function __construct(ProtocolInterface ...$versions) {
+        if (count($versions) > 0) {
+            $this->collection = new ProtocolCollection(...$versions);
+        } else {
+            $this->collection = ProtocolCollection::default();
+        }
+    }
+
+    /**
      * @param KeyInterface $key
      * @return string
      *
@@ -35,6 +50,10 @@ class Local implements PaserkTypeInterface
         }
         $this->throwIfInvalidProtocol($key->getProtocol());
         /// @SPEC DETAIL: Algorithm Lucidity
+
+        if (Binary::safeStrlen($key->raw()) < 32) {
+            throw new PaserkException("Symmetric keys must be 256-bit");
+        }
 
         $version = Util::getPaserkHeader($key->getProtocol());
         return implode('.', [$version, self::getTypeLabel(), $key->encode()]);
@@ -58,9 +77,13 @@ class Local implements PaserkTypeInterface
         $version = Util::getPasetoVersion($pieces[0]);
         $this->throwIfInvalidProtocol($version);
         /// @SPEC DETAIL: Algorithm Lucidity
+        $decoded = Base64UrlSafe::decode($pieces[2]);
+        if (Binary::safeStrlen($decoded) < 32) {
+            throw new PaserkException("Symmetric keys must be 256-bit");
+        }
 
         return new SymmetricKey(
-            Base64UrlSafe::decode($pieces[2]),
+            $decoded,
             $version
         );
     }

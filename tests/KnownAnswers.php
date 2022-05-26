@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Tests;
 
+use ParagonIE\ConstantTime\Binary;
 use ParagonIE\Paseto\ProtocolInterface;
 use PHPUnit\Framework\TestCase;
 use ParagonIE\Paseto\Protocol\{
@@ -62,4 +63,24 @@ abstract class KnownAnswers extends TestCase
         return $decodedFile;
     }
 
+    protected function getProtocol(string $test): ProtocolInterface
+    {
+        $header = Binary::safeSubstr($test, 0, 2);
+        switch ($header) {
+            case 'v1':
+            case 'k1':
+                return new Version1();
+            case 'v2':
+            case 'k2':
+                return new Version2();
+            case 'v3':
+            case 'k3':
+                return new Version3();
+            case 'v4':
+            case 'k4':
+                return new Version4();
+            default:
+                throw new \Exception("Unknown protocol: {$test}");
+        }
+    }
 }

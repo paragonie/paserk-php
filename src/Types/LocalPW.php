@@ -8,8 +8,11 @@ use ParagonIE\Paserk\Operations\PBKW;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\PaserkTypeInterface;
 use ParagonIE\Paserk\Util;
+use ParagonIE\Paseto\Exception\InvalidVersionException;
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\ProtocolCollection;
+use ParagonIE\Paseto\ProtocolInterface;
 use function
     array_key_exists,
     explode;
@@ -33,14 +36,22 @@ class LocalPW implements PaserkTypeInterface
 
     /**
      * LocalPW constructor.
+     *
      * @param HiddenString $password
      * @param array $options
+     * @param ProtocolInterface ...$version
+     * @throws InvalidVersionException
      */
-    public function __construct(HiddenString $password, array $options = [])
+    public function __construct(HiddenString $password, array $options = [], ProtocolInterface ...$version)
     {
         $this->password = $password;
         $this->options = $options;
         $this->localCache = [];
+        if (count($version) > 0) {
+            $this->collection = new ProtocolCollection(...$version);
+        } else {
+            $this->collection = ProtocolCollection::default();
+        }
     }
 
     /**
