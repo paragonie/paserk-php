@@ -45,9 +45,29 @@ class LocalTest extends KnownAnswers
      */
     protected function genericTest(ProtocolInterface $version, string $name, array $tests): void
     {
+        $local = new Local($version);
         foreach ($tests as $test) {
+            if ($test['expect-fail']) {
+                if (is_null($test['key'])) {
+                    try {
+                        $local->decode($test['paserk']);
+                        $this->fail($test['name'] . ': ' . $test['comment']);
+                    } catch (PaserkException $ex) {
+                    }
+                    continue;
+                }
+
+                $localkey = new SymmetricKey(Hex::decode($test['key']), $version);
+                try {
+                    $local->encode($localkey);
+                    $this->fail($test['name'] . ': ' . $test['comment']);
+                } catch (PaserkException $ex) {
+                }
+
+                continue;
+            }
             $localkey = new SymmetricKey(Hex::decode($test['key']), $version);
-            $this->assertSame($test['paserk'], (new Local())->encode($localkey), $test['name']);
+            $this->assertSame($test['paserk'], $local->encode($localkey), $test['name']);
         }
     }
 }

@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
+use FG\ASN1\Exception\ParserException;
 use ParagonIE\Paserk\IdCommonTrait;
 use ParagonIE\Paserk\IdInterface;
 use ParagonIE\Paserk\PaserkException;
@@ -24,7 +25,11 @@ class Pid implements IdInterface
      */
     public static function encodePublic(AsymmetricPublicKey $pk): string
     {
-        return self::encode($pk->getProtocol(), (new PublicType())->encode($pk));
+        try {
+            return self::encode($pk->getProtocol(), (new PublicType())->encode($pk));
+        } catch (ParserException $ex) {
+            throw new PaserkException("Invalid public key");
+        }
     }
 
     /**
