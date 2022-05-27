@@ -96,7 +96,7 @@ class Seal implements PaserkTypeInterface
         $this->throwIfInvalidProtocol($key->getProtocol());
         /// @SPEC DETAIL: Algorithm Lucidity
 
-        $localId = (new Local())->encode($key);
+        $localId = (new Local($this->pk->getProtocol()))->encode($key);
         if (!array_key_exists($localId, $this->localCache)) {
             $pke = new PKE($this->pk->getProtocol());
             $this->localCache[$localId] = $pke->seal($key, $this->pk);

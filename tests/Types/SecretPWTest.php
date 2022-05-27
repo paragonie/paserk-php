@@ -3,8 +3,8 @@ declare(strict_types=1);
 namespace ParagonIE\Paserk\Tests\Types;
 
 use ParagonIE\HiddenString\HiddenString;
-use ParagonIE\Paserk\Types\LocalPW;
-use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paserk\Types\SecretPW;
+use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 use ParagonIE\Paseto\Protocol\{
     Version1,
     Version2,
@@ -15,12 +15,12 @@ use ParagonIE\Paseto\ProtocolInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Class LocalPWTest
+ * Class SecretPWTest
  * @package ParagonIE\Paserk\Tests\Types
  *
- * @covers LocalPW
+ * @covers SecretPW
  */
-class LocalPWTest extends TestCase
+class SecretPWTest extends TestCase
 {
     /** @var ProtocolInterface[] */
     protected $versions = [];
@@ -35,7 +35,7 @@ class LocalPWTest extends TestCase
         ];
     }
 
-    public function testLocalPW()
+    public function testSecretPW()
     {
         $password = new HiddenString('correct horse battery staple');
         $testConfig = [
@@ -46,13 +46,13 @@ class LocalPWTest extends TestCase
         ];
 
         foreach ($this->versions as $v) {
-            $wrapper = new LocalPW($password, $testConfig, $v);
-            $sym = SymmetricKey::generate($v);
-            $wrapped = $wrapper->encode($sym);
-            /** @var SymmetricKey $unwrap */
+            $wrapper = new SecretPW($password, $testConfig, $v);
+            $asym = AsymmetricSecretKey::generate($v);
+            $wrapped = $wrapper->encode($asym);
+            /** @var AsymmetricSecretKey $unwrap */
             $unwrap = $wrapper->decode($wrapped);
             $this->assertSame(
-                $sym->encode(),
+                $asym->encode(),
                 $unwrap->encode()
             );
         }

@@ -68,9 +68,9 @@ class PublicTest extends TestCase
 
     public function testEncodeDecode()
     {
-        $public = new PublicType();
         /** @var AsymmetricPublicKey $key */
         foreach ([$this->v1pk, $this->v2pk, $this->v3pk, $this->v4pk] as $key) {
+            $public = new PublicType($key->getProtocol());
             $encoded = $public->encode($key);
             $decoded = $public->decode($encoded);
             if ($key->getProtocol() instanceof Version1) {

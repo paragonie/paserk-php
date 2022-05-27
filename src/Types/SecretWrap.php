@@ -7,6 +7,7 @@ use ParagonIE\Paserk\Operations\Wrap\Pie;
 use ParagonIE\Paserk\Operations\Wrap;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\PaserkTypeInterface;
+use ParagonIE\Paseto\Exception\InvalidVersionException;
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\{
     AsymmetricSecretKey,
@@ -63,7 +64,9 @@ class SecretWrap implements PaserkTypeInterface
     /**
      * @param KeyInterface $key
      * @return string
+     *
      * @throws PaserkException
+     * @throws InvalidVersionException
      */
     public function encode(KeyInterface $key): string
     {
@@ -72,7 +75,7 @@ class SecretWrap implements PaserkTypeInterface
         }
         $this->throwIfInvalidProtocol($key->getProtocol());
         /// @SPEC DETAIL: Algorithm Lucidity
-        $secretId = (new SecretType())->encode($key);
+        $secretId = (new SecretType($this->wrap->getProtocol()))->encode($key);
         if (!array_key_exists($secretId, $this->localCache)) {
             $this->localCache[$secretId] = $this->wrap->secretWrap($key);
         }

@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace ParagonIE\Paserk\Operations;
 
 use ParagonIE\Paseto\KeyInterface;
+use ParagonIE\Paseto\ProtocolInterface;
 
 /**
  * Interface WrapInterface
@@ -16,6 +17,11 @@ interface WrapInterface
      * @return string
      */
     public static function customId(): string;
+
+    /**
+     * @return ProtocolInterface
+     */
+    public function getProtocol(): ProtocolInterface;
 
     /**
      * @param string $header

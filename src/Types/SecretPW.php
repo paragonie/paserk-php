@@ -51,7 +51,7 @@ class SecretPW implements PaserkTypeInterface
         if (count($version) > 0) {
             $this->collection = new ProtocolCollection(...$version);
         } else {
-            $this->collection = ProtocolCollection::default();
+            $this->collection = ProtocolCollection::v4();
         }
     }
 
@@ -87,7 +87,7 @@ class SecretPW implements PaserkTypeInterface
         $this->throwIfInvalidProtocol($key->getProtocol());
         /// @SPEC DETAIL: Algorithm Lucidity
 
-        $secretId = (new SecretType())->encode($key);
+        $secretId = (new SecretType($key->getProtocol()))->encode($key);
         if (!array_key_exists($secretId, $this->localCache)) {
             $this->localCache[$secretId] = PBKW::forVersion($key->getProtocol())
                 ->secretPwWrap($key, $this->password, $this->options);
