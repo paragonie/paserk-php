@@ -13,6 +13,7 @@ use ParagonIE\Paseto\Keys\{
     AsymmetricSecretKey,
     SymmetricKey
 };
+use ParagonIE\Paseto\ProtocolCollection;
 use function array_key_exists;
 
 /**
@@ -42,10 +43,14 @@ class SecretWrap implements PaserkTypeInterface
     /**
      * @param SymmetricKey $key
      * @return static
+     *
+     * @throws InvalidVersionException
      */
     public static function initWithKey(SymmetricKey $key): self
     {
-        return new self(new Wrap(new Pie($key)));
+        $init = new self(new Wrap(new Pie($key)));
+        $init->setProtocolsAllowed(new ProtocolCollection($key->getProtocol()));
+        return $init;
     }
 
     /**
@@ -93,6 +98,8 @@ class SecretWrap implements PaserkTypeInterface
     /**
      * @param KeyInterface $key
      * @return string
+     *
+     * @throws InvalidVersionException
      * @throws PaserkException
      * @throws \SodiumException
      */
