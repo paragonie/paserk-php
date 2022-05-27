@@ -2,16 +2,25 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
-use ParagonIE\ConstantTime\{Base64, Base64UrlSafe, Binary};
-use ParagonIE\Paserk\ConstraintTrait;
-use ParagonIE\Paseto\KeyInterface;
-use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
-use ParagonIE\Paserk\PaserkException;
-use ParagonIE\Paserk\PaserkTypeInterface;
-use ParagonIE\Paserk\Util;
-use ParagonIE\Paseto\Protocol\Version1;
-use ParagonIE\Paseto\ProtocolCollection;
-use ParagonIE\Paseto\ProtocolInterface;
+use ParagonIE\ConstantTime\{
+    Base64,
+    Base64UrlSafe,
+    Binary
+};
+use ParagonIE\Paserk\{
+    ConstraintTrait,
+    PaserkException,
+    PaserkTypeInterface,
+    Util
+};
+use ParagonIE\Paseto\{
+    Exception\InvalidVersionException,
+    KeyInterface,
+    Keys\AsymmetricPublicKey,
+    Protocol\Version1,
+    ProtocolCollection,
+    ProtocolInterface
+};
 use function
     chunk_split,
     count,
@@ -28,11 +37,14 @@ class PublicType implements PaserkTypeInterface
 {
     use ConstraintTrait;
 
+    /**
+     * @throws InvalidVersionException
+     */
     public function __construct(ProtocolInterface ...$versions) {
         if (count($versions) > 0) {
             $this->collection = new ProtocolCollection(...$versions);
         } else {
-            $this->collection = ProtocolCollection::default();
+            $this->collection = ProtocolCollection::v4();
         }
     }
 
