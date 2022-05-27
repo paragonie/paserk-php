@@ -36,4 +36,22 @@ bool(false)
 
 ## Class Definition: `Lid`
 
+`Lid` is protocol-agnostic, since it's only concerned with the serialization
+of keys and doesn't provide a deserialization interface.
 
+### Static Methods
+
+#### `encodeLocal()`
+
+```php
+/**
+* @param SymmetricKey $sk
+* @return string
+* @throws PaserkException
+* @throws SodiumException
+*/
+public static function encodeLocal(SymmetricKey $sk): string;
+```
+
+Passing a `SymmetricKey` to `Lid::encodeLocal()` will return a string containing
+the encoded symmetric key.

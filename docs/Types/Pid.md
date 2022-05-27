@@ -36,4 +36,22 @@ bool(false)
 
 ## Class Definition: `Pid`
 
+`Pid` is protocol-agnostic, since it's only concerned with the serialization
+of keys and doesn't provide a deserialization interface.
 
+### Static Methods
+
+#### `encodePublic()`
+
+```php
+/**
+* @param AsymmetricPublicKey $sk
+* @return string
+* @throws PaserkException
+* @throws SodiumException
+*/
+public static function encodePublic(AsymmetricPublicKey $sk): string;
+```
+
+Passing an `AsymmetricPublicKey` to `Pid::encodePublic()` will return a string containing
+the encoded public key.

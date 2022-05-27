@@ -30,4 +30,59 @@ string(34) "ParagonIE\Paseto\Keys\SymmetricKey"
 
 ## Class Definition: `Local`
 
+### Constructor
 
+```php
+public function __construct(ProtocolInterface ...$versions): Local;
+```
+
+The `Local` class accepts multiple protocol versions as constructor arguments.
+If not provided, it will default to only supporting Version 4.
+
+### Class Methods
+
+#### `decode()`
+
+```php
+/**
+ * @param string $paserk
+ * @return KeyInterface
+ *
+ * @throws PaserkException
+ */
+public function decode(string $paserk): KeyInterface;
+```
+
+Note: Although the return type declaration is `KeyInterface`, `Local` returns
+a `SymmetricKey`.
+
+#### `encode()`
+
+```php
+/**
+ * @param KeyInterface $key
+ * @return string
+ *
+ * @throws PaserkException
+ */
+public function encode(KeyInterface $key): string;
+```
+
+Note: Although the type declaration is `KeyInterface`, you **MUST** supply a
+`SymmetricKey` to use `Local` serialization.
+
+#### `id()`
+
+```php
+/**
+ * Get the lid PASERK for the PASERK representation of this local key.
+ *
+ * @param KeyInterface $key
+ * @return string
+ * @throws PaserkException
+ * @throws \SodiumException
+ */
+public function id(KeyInterface $key): string;
+```
+
+See [Lid](Lid.md#encodelocal).

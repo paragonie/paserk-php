@@ -33,4 +33,22 @@ bool(false)
 
 ## Class Definition: `Sid`
 
+`Sid` is protocol-agnostic, since it's only concerned with the serialization
+of keys and doesn't provide a deserialization interface.
 
+### Static Methods
+
+#### `encodeSecret()`
+
+```php
+/**
+* @param AsymmetricSecretKey $sk
+* @return string
+* @throws PaserkException
+* @throws SodiumException
+*/
+public static function encodeSecret(AsymmetricSecretKey $sk): string;
+```
+
+Passing an `AsymmetricSecretKey` to `Sid::encodeSecret()` will return a string containing
+the encoded secret key.

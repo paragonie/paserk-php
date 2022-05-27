@@ -31,4 +31,59 @@ string(41) "ParagonIE\Paseto\Keys\AsymmetricSecretKey"
 
 ## Class Definition: `SecretType`
 
+### Constructor
 
+```php
+public function __construct(ProtocolInterface ...$versions): Local;
+```
+
+The `SecretType` class accepts multiple protocol versions as constructor arguments.
+If not provided, it will default to only supporting Version 4.
+
+### Class Methods
+
+#### `decode()`
+
+```php
+/**
+ * @param string $paserk
+ * @return KeyInterface
+ *
+ * @throws PaserkException
+ */
+public function decode(string $paserk): KeyInterface;
+```
+
+Note: Although the return type declaration is `KeyInterface`, `SecretType` returns
+an `AsymmetricSecretKey`.
+
+#### `encode()`
+
+```php
+/**
+ * @param KeyInterface $key
+ * @return string
+ *
+ * @throws PaserkException
+ */
+public function encode(KeyInterface $key): string;
+```
+
+Note: Although the type declaration is `KeyInterface`, you **MUST** supply a
+`AsymmetricSecretKey` to use `SecretType` serialization.
+
+#### `id()`
+
+```php
+/**
+ * Get the sid PASERK for the PASERK representation of this local key.
+ *
+ * @param KeyInterface $key
+ * @return string
+ * @throws PaserkException
+ * @throws \SodiumException
+ */
+public function id(KeyInterface $key): string;
+```
+
+See [Sid](Sid.md#encodesecret).
