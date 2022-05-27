@@ -104,6 +104,8 @@ class SecretPW implements PaserkTypeInterface
     }
 
     /**
+     * Get the sid PASERK for the PASERK representation of this secret key.
+     *
      * @param KeyInterface $key
      * @return string
      *

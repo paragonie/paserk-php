@@ -35,4 +35,67 @@ string(41) "ParagonIE\Paseto\Keys\AsymmetricSecretKey"
 
 ## Class Definition: `SecretPW`
 
+### Constructor
 
+```php
+/**
+ * SecretPW constructor.
+ *
+ * @param HiddenString $password
+ * @param array $options
+ * @param ProtocolInterface ...$version
+ * @throws InvalidVersionException
+ */
+public function __construct(
+    HiddenString $password,
+    array $options = [],
+    ProtocolInterface ...$version
+): SecretPW;
+```
+
+### Methods
+
+#### `decode()`
+
+```php
+/**
+ * @param string $paserk
+ * @return KeyInterface
+ * @throws PaserkException
+ */
+public function decode(string $paserk): KeyInterface;
+```
+
+Note: Although the return type declaration is `KeyInterface`, `SecretPW` returns
+an `AsymmetricSecretKey`.
+
+#### `encode()`
+
+```php
+/**
+ * @param KeyInterface $key
+ * @return string
+ * @throws PaserkException
+ */
+public function encode(KeyInterface $key): string;
+```
+
+Note: Although the type declaration is `KeyInterface`, you **MUST** supply a
+`AsymmetricSecretKey` to use `SecretPW` serialization.
+
+#### `id()`
+
+```php
+/**
+ * Get the sid PASERK for the PASERK representation of this secret key.
+ *
+ * @param KeyInterface $key
+ * @return string
+ *
+ * @throws PaserkException
+ * @throws \SodiumException
+ */
+public function id(KeyInterface $key): string;
+```
+
+See [Sid](Sid.md#encodesecret).

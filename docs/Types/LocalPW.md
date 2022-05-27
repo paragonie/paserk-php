@@ -35,4 +35,67 @@ string(34) "ParagonIE\Paseto\Keys\SymmetricKey"
 
 ## Class Definition: `LocalPW`
 
+### Constructor
 
+```php
+/**
+ * LocalPW constructor.
+ *
+ * @param HiddenString $password
+ * @param array $options
+ * @param ProtocolInterface ...$version
+ * @throws InvalidVersionException
+ */
+public function __construct(
+    HiddenString $password,
+    array $options = [],
+    ProtocolInterface ...$version
+): LocalPW;
+```
+
+### Methods
+
+#### `decode()`
+
+```php
+/**
+ * @param string $paserk
+ * @return KeyInterface
+ * @throws PaserkException
+ */
+public function decode(string $paserk): KeyInterface;
+```
+
+Note: Although the return type declaration is `KeyInterface`, `LocalPW` returns
+a `SymmetricKey`.
+
+#### `encode()`
+
+```php
+/**
+ * @param KeyInterface $key
+ * @return string
+ * @throws PaserkException
+ */
+public function encode(KeyInterface $key): string;
+```
+
+Note: Although the type declaration is `KeyInterface`, you **MUST** supply a
+`SymmetricKey` to use `LocalPW` serialization.
+
+#### `id()`
+
+```php
+/**
+ * Get the lid PASERK for the PASERK representation of this local key.
+ *
+ * @param KeyInterface $key
+ * @return string
+ *
+ * @throws PaserkException
+ * @throws \SodiumException
+ */
+public function id(KeyInterface $key): string;
+```
+
+See [Lid](Lid.md#encodelocal).

@@ -152,7 +152,7 @@ class SecretType implements PaserkTypeInterface
     }
 
     /**
-     * Get the lid PASERK for the PASERK representation of this local key.
+     * Get the lid PASERK for the PASERK representation of this secret key.
      *
      * @param KeyInterface $key
      * @return string

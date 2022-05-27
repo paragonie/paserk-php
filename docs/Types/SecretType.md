@@ -76,7 +76,7 @@ Note: Although the type declaration is `KeyInterface`, you **MUST** supply a
 
 ```php
 /**
- * Get the sid PASERK for the PASERK representation of this local key.
+ * Get the sid PASERK for the PASERK representation of this secret key.
  *
  * @param KeyInterface $key
  * @return string

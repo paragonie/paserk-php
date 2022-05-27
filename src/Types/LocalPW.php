@@ -102,6 +102,8 @@ class LocalPW implements PaserkTypeInterface
     }
 
     /**
+     * Get the lid PASERK for the PASERK representation of this local key.
+     *
      * @param KeyInterface $key
      * @return string
      *
