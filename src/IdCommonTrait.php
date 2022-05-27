@@ -26,7 +26,7 @@ use function
  * @package ParagonIE\Paserk
  *
  * @method static string getTypeLabel()
- * @see Lid, Pid
+ * @see Lid, Pid, Sid
  */
 trait IdCommonTrait
 {
