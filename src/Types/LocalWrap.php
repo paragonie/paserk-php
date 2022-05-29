@@ -65,6 +65,8 @@ class LocalWrap implements PaserkTypeInterface
     /**
      * @param KeyInterface $key
      * @return string
+     *
+     * @throws InvalidVersionException
      * @throws PaserkException
      */
     public function encode(KeyInterface $key): string
@@ -90,6 +92,8 @@ class LocalWrap implements PaserkTypeInterface
     /**
      * @param KeyInterface $key
      * @return string
+     *
+     * @throws InvalidVersionException
      * @throws PaserkException
      * @throws \SodiumException
      */
