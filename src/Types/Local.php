@@ -33,7 +33,7 @@ class Local implements PaserkTypeInterface
         if (count($versions) > 0) {
             $this->collection = new ProtocolCollection(...$versions);
         } else {
-            $this->collection = ProtocolCollection::default();
+            $this->collection = ProtocolCollection::v4();
         }
     }
 

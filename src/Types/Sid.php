@@ -24,7 +24,8 @@ class Sid implements IdInterface
      */
     public static function encodeSecret(AsymmetricSecretKey $sk): string
     {
-        return self::encode($sk->getProtocol(), (new SecretType())->encode($sk));
+        $version = $sk->getProtocol();
+        return self::encode($version, (new SecretType($version))->encode($sk));
     }
 
     /**

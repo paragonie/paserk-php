@@ -57,9 +57,9 @@ class SecretTest extends TestCase
 
     public function testEncodeDecode()
     {
-        $secret = new SecretType();
         /** @var AsymmetricPublicKey $key */
         foreach ([$this->v1sk, $this->v2sk, $this->v3sk, $this->v4sk] as $key) {
+            $secret = new SecretType($key->getProtocol());
             $encoded = $secret->encode($key);
             $decoded = $secret->decode($encoded);
             if ($key->getProtocol() instanceof Version1) {

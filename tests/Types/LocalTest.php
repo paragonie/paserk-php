@@ -41,9 +41,9 @@ class LocalTest extends TestCase
      */
     public function testEncode()
     {
-        $local = new Local();
         /** @var SymmetricKey $key */
         foreach ([$this->v1key, $this->v2key, $this->v3key, $this->v4key] as $key) {
+            $local = new Local($key->getProtocol());
             $encoded = $local->encode($key);
             $decoded = $local->decode($encoded);
             $this->assertSame(

@@ -7,8 +7,10 @@ use ParagonIE\Paserk\Operations\Wrap\Pie;
 use ParagonIE\Paserk\Operations\Wrap;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\PaserkTypeInterface;
+use ParagonIE\Paseto\Exception\InvalidVersionException;
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\ProtocolCollection;
 use function array_key_exists;
 
 /**
@@ -38,10 +40,14 @@ class LocalWrap implements PaserkTypeInterface
     /**
      * @param SymmetricKey $key
      * @return static
+     *
+     * @throws InvalidVersionException
      */
     public static function initWithKey(SymmetricKey $key): self
     {
-        return new self(new Wrap(new Pie($key)));
+        $init = new self(new Wrap(new Pie($key)));
+        $init->setProtocolsAllowed(new ProtocolCollection($key->getProtocol()));
+        return $init;
     }
 
     /**
@@ -59,6 +65,8 @@ class LocalWrap implements PaserkTypeInterface
     /**
      * @param KeyInterface $key
      * @return string
+     *
+     * @throws InvalidVersionException
      * @throws PaserkException
      */
     public function encode(KeyInterface $key): string
@@ -69,7 +77,7 @@ class LocalWrap implements PaserkTypeInterface
         $this->throwIfInvalidProtocol($key->getProtocol());
         /// @SPEC DETAIL: Algorithm Lucidity
 
-        $localId = (new Local())->encode($key);
+        $localId = (new Local($this->wrap->getProtocol()))->encode($key);
         if (!array_key_exists($localId, $this->localCache)) {
             $this->localCache[$localId] = $this->wrap->localWrap($key);
         }
@@ -84,6 +92,8 @@ class LocalWrap implements PaserkTypeInterface
     /**
      * @param KeyInterface $key
      * @return string
+     *
+     * @throws InvalidVersionException
      * @throws PaserkException
      * @throws \SodiumException
      */

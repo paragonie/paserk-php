@@ -29,7 +29,8 @@ class Lid implements IdInterface
         if (Binary::safeStrlen($key->raw()) < 32) {
             throw new PaserkException("Key is too short");
         }
-        return self::encode($key->getProtocol(), (new Local())->encode($key));
+        $version = $key->getProtocol();
+        return self::encode($version, (new Local($version))->encode($key));
     }
 
     /**

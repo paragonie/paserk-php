@@ -70,6 +70,14 @@ class Pie implements WrapInterface
     }
 
     /**
+     * @return ProtocolInterface
+     */
+    public function getProtocol(): ProtocolInterface
+    {
+        return $this->wrappingKey->getProtocol();
+    }
+
+    /**
      * @param string $header
      * @param KeyInterface $key
      * @return string

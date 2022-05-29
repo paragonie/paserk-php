@@ -8,6 +8,7 @@ use ParagonIE\Paseto\Keys\{
     AsymmetricSecretKey,
     SymmetricKey
 };
+use ParagonIE\Paseto\ProtocolInterface;
 use TypeError;
 
 /**
@@ -26,6 +27,14 @@ class Wrap
     public function __construct(WrapInterface $wrapper)
     {
         $this->wrapper = $wrapper;
+    }
+
+    /**
+     * @return ProtocolInterface
+     */
+    public function getProtocol(): ProtocolInterface
+    {
+        return $this->wrapper->getProtocol();
     }
 
     /**

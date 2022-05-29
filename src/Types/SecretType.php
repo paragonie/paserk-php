@@ -4,6 +4,7 @@ namespace ParagonIE\Paserk\Types;
 
 use ParagonIE\ConstantTime\{Base64, Base64UrlSafe, Binary};
 use ParagonIE\Paserk\ConstraintTrait;
+use ParagonIE\Paseto\Exception\InvalidVersionException;
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 use ParagonIE\Paserk\PaserkException;
@@ -29,11 +30,14 @@ class SecretType implements PaserkTypeInterface
 {
     use ConstraintTrait;
 
+    /**
+     * @throws InvalidVersionException
+     */
     public function __construct(ProtocolInterface ...$versions) {
         if (count($versions) > 0) {
             $this->collection = new ProtocolCollection(...$versions);
         } else {
-            $this->collection = ProtocolCollection::default();
+            $this->collection = ProtocolCollection::v4();
         }
     }
 
@@ -148,7 +152,7 @@ class SecretType implements PaserkTypeInterface
     }
 
     /**
-     * Get the lid PASERK for the PASERK representation of this local key.
+     * Get the lid PASERK for the PASERK representation of this secret key.
      *
      * @param KeyInterface $key
      * @return string

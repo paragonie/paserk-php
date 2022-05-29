@@ -50,7 +50,7 @@ class LocalPW implements PaserkTypeInterface
         if (count($version) > 0) {
             $this->collection = new ProtocolCollection(...$version);
         } else {
-            $this->collection = ProtocolCollection::default();
+            $this->collection = ProtocolCollection::v4();
         }
     }
 
@@ -85,7 +85,7 @@ class LocalPW implements PaserkTypeInterface
         $this->throwIfInvalidProtocol($key->getProtocol());
         /// @SPEC DETAIL: Algorithm Lucidity
 
-        $localId = (new Local())->encode($key);
+        $localId = (new Local($key->getProtocol()))->encode($key);
         if (!array_key_exists($localId, $this->localCache)) {
             $this->localCache[$localId] = PBKW::forVersion($key->getProtocol())
                 ->localPwWrap($key, $this->password, $this->options);
@@ -102,6 +102,8 @@ class LocalPW implements PaserkTypeInterface
     }
 
     /**
+     * Get the lid PASERK for the PASERK representation of this local key.
+     *
      * @param KeyInterface $key
      * @return string
      *

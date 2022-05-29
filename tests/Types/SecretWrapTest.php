@@ -65,7 +65,6 @@ class SecretWrapTest extends TestCase
             $wk = SymmetricKey::generate($version);
             $sw = SecretWrap::initWithKey($wk);
 
-
             $id = $sw->id($key);
             $encoded = $sw->encode($key);
             $id2 = Sid::encode($version, $encoded);
