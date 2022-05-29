@@ -18,6 +18,10 @@ The PASERK Specification can be found [in this repository](https://github.com/pa
 composer require paragonie/paserk
 ```
 
+## Documentation
+
+See [this directory](docs) for the documentation.
+
 ## Example: Public-key Encryption
 
 ### Wrapping
