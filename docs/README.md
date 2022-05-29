@@ -43,6 +43,9 @@ This section merely focuses on how to use the PHP implementation.
   * [`secret-pw`](Types/SecretPW.md)
   * [`seal`](Types/Seal.md) (Asymmetric Encryption)
 
+For `local-wrap` and `secret-wrap`, the key-wrapping protocols this library implements
+are listed in [this directory](Wrap).
+
 ## What About the PASERK Operations?
 
 We do not recommend interfacing directly with the PASERK Operations.

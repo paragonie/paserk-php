@@ -110,3 +110,10 @@ public function id(KeyInterface $key): string;
 ```
 
 See [Lid](Lid.md#encodelocal).
+
+## Custom Wrap Protocols
+
+See [this section](../Wrap) for all the supported Wrap implementations.
+
+See [the PASERK specification](https://github.com/paseto-standard/paserk/tree/master/operations/Wrap)
+for all the publicly specified custom wrapping protocols.
