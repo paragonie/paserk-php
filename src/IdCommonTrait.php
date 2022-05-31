@@ -8,7 +8,8 @@ use ParagonIE\ConstantTime\{
 };
 use ParagonIE\Paserk\Types\{
     Lid,
-    Pid
+    Pid,
+    Sid
 };
 use ParagonIE\Paseto\Protocol\{
     Version1,
@@ -17,6 +18,7 @@ use ParagonIE\Paseto\Protocol\{
     Version4
 };
 use ParagonIE\Paseto\ProtocolInterface;
+use SodiumException;
 use function
     hash,
     sodium_crypto_generichash;
@@ -31,12 +33,25 @@ use function
 trait IdCommonTrait
 {
     /**
+     * @param mixed[] $args
+     * @throws PaserkException
+     */
+    final public static function decode(...$args): void
+    {
+        throw new PaserkException(
+            "PASERK IDs are a one-way transformation. There is no 'decode' option."
+        );
+    }
+
+    /**
+     * Calculate the Key-ID for a given PASERK.
+     *
      * @param ProtocolInterface $version
      * @param string $paserk
      * @return string
      *
      * @throws PaserkException
-     * @throws \SodiumException
+     * @throws SodiumException
      */
     public static function encode(ProtocolInterface $version, string $paserk): string
     {

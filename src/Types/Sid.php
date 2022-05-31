@@ -2,9 +2,12 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
-use ParagonIE\Paserk\IdCommonTrait;
-use ParagonIE\Paserk\IdInterface;
-use ParagonIE\Paserk\PaserkException;
+use ParagonIE\Paserk\{
+    IdCommonTrait,
+    IdInterface,
+    PaserkException
+};
+use ParagonIE\Paseto\Exception\InvalidVersionException;
 use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 use SodiumException;
 
@@ -17,8 +20,12 @@ class Sid implements IdInterface
     use IdCommonTrait;
 
     /**
+     * Calculate the PASERK secret key ID for a given AsymmetricSecretKey.
+     *
      * @param AsymmetricSecretKey $sk
      * @return string
+     *
+     * @throws InvalidVersionException
      * @throws PaserkException
      * @throws SodiumException
      */

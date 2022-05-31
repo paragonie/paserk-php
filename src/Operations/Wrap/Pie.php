@@ -5,13 +5,8 @@ namespace ParagonIE\Paserk\Operations\Wrap;
 use ParagonIE\ConstantTime\{
     Base64,
     Base64UrlSafe,
-    Binary,
-    Hex
+    Binary
 };
-use ParagonIE\EasyECC\ECDSA\SecretKey;
-use ParagonIE\Paserk\Operations\WrapInterface;
-use ParagonIE\Paserk\PaserkException;
-use ParagonIE\Paserk\Util;
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\{
     AsymmetricSecretKey,
@@ -24,6 +19,9 @@ use ParagonIE\Paseto\Protocol\{
     Version3,
     Version4
 };
+use ParagonIE\Paserk\Operations\WrapInterface;
+use ParagonIE\Paserk\PaserkException;
+use ParagonIE\Paserk\Util;
 use Exception;
 use SodiumException;
 use function
@@ -134,7 +132,9 @@ class Pie implements WrapInterface
         $rawKeyBytes = '' . $key->raw();
         if ($key->getProtocol() instanceof Version3 && Binary::safeStrlen($rawKeyBytes) !== 48) {
             // Get the raw scalar, not a PEM-encoded key
-            $rawKeyBytes = Base64UrlSafe::decode($key->encode());
+            if ($key instanceof AsymmetricSecretKey) {
+                $rawKeyBytes = Base64UrlSafe::decode($key->encode());
+            }
         }
         $c = openssl_encrypt(
             $rawKeyBytes,

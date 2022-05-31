@@ -3,9 +3,11 @@ declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
 use ParagonIE\ConstantTime\Binary;
-use ParagonIE\Paserk\IdCommonTrait;
-use ParagonIE\Paserk\IdInterface;
-use ParagonIE\Paserk\PaserkException;
+use ParagonIE\Paserk\{
+    IdCommonTrait,
+    IdInterface,
+    PaserkException
+};
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use SodiumException;
 

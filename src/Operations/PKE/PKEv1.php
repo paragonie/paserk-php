@@ -7,7 +7,6 @@ use ParagonIE\ConstantTime\{
     Base64UrlSafe,
     Binary
 };
-use ParagonIE\Paseto\ProtocolInterface;
 use ParagonIE\Paserk\Operations\Key\{
     SealingPublicKey,
     SealingSecretKey
@@ -17,9 +16,12 @@ use ParagonIE\Paserk\Operations\{
     PKEInterface
 };
 use ParagonIE\Paserk\PaserkException;
-use ParagonIE\Paseto\Keys\SymmetricKey;
-use ParagonIE\Paseto\Protocol\Version1;
 use ParagonIE\Paserk\Util;
+use ParagonIE\Paseto\{
+    Keys\SymmetricKey,
+    Protocol\Version1,
+    ProtocolInterface
+};
 use phpseclib\Crypt\RSA;
 use Exception;
 use function

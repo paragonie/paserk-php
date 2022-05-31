@@ -2,14 +2,22 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
-use ParagonIE\Paserk\ConstraintTrait;
-use ParagonIE\Paserk\Operations\Key\SealingPublicKey;
-use ParagonIE\Paserk\Operations\Key\SealingSecretKey;
-use ParagonIE\Paserk\Operations\PKE;
-use ParagonIE\Paserk\PaserkException;
-use ParagonIE\Paserk\PaserkTypeInterface;
-use ParagonIE\Paseto\KeyInterface;
-use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paserk\{
+    ConstraintTrait,
+    PaserkException,
+    PaserkTypeInterface
+};
+use ParagonIE\Paserk\Operations\{
+    PKE,
+    Key\SealingPublicKey,
+    Key\SealingSecretKey
+};
+use ParagonIE\Paseto\{
+    Exception\InvalidVersionException,
+    KeyInterface,
+    Keys\SymmetricKey
+};
+use SodiumException;
 use Throwable;
 use function
     array_key_exists,
@@ -49,7 +57,7 @@ class Seal implements PaserkTypeInterface
 
     /**
      * @param SealingSecretKey $sk
-     * @return static
+     * @return self
      *
      * @throws PaserkException
      */
@@ -87,6 +95,7 @@ class Seal implements PaserkTypeInterface
      * @return string
      *
      * @throws PaserkException
+     * @throws InvalidVersionException
      */
     public function encode(KeyInterface $key): string
     {
@@ -116,8 +125,9 @@ class Seal implements PaserkTypeInterface
      * @param KeyInterface $key
      * @return string
      *
+     * @throws InvalidVersionException
      * @throws PaserkException
-     * @throws \SodiumException
+     * @throws SodiumException
      */
     public function id(KeyInterface $key): string
     {

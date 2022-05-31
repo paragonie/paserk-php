@@ -2,15 +2,21 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
-use ParagonIE\Paserk\ConstraintTrait;
-use ParagonIE\Paserk\Operations\Wrap\Pie;
-use ParagonIE\Paserk\Operations\Wrap;
-use ParagonIE\Paserk\PaserkException;
-use ParagonIE\Paserk\PaserkTypeInterface;
-use ParagonIE\Paseto\Exception\InvalidVersionException;
-use ParagonIE\Paseto\KeyInterface;
-use ParagonIE\Paseto\Keys\SymmetricKey;
-use ParagonIE\Paseto\ProtocolCollection;
+use ParagonIE\Paserk\{
+    ConstraintTrait,
+    PaserkException,
+    PaserkTypeInterface
+};
+use ParagonIE\Paserk\Operations\{
+    Wrap\Pie,
+    Wrap
+};
+use ParagonIE\Paseto\{
+    Exception\InvalidVersionException,
+    KeyInterface,
+    Keys\SymmetricKey,
+    ProtocolCollection
+};
 use function array_key_exists;
 
 /**
@@ -38,8 +44,10 @@ class LocalWrap implements PaserkTypeInterface
     }
 
     /**
+     * Quick and easy constructor-alternative for using the Pie wrapper.
+     *
      * @param SymmetricKey $key
-     * @return static
+     * @return self
      *
      * @throws InvalidVersionException
      */

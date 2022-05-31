@@ -2,17 +2,23 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
-use ParagonIE\ConstantTime\Base64UrlSafe;
-use ParagonIE\ConstantTime\Binary;
-use ParagonIE\Paserk\ConstraintTrait;
-use ParagonIE\Paseto\Exception\InvalidVersionException;
-use ParagonIE\Paseto\KeyInterface;
-use ParagonIE\Paseto\Keys\SymmetricKey;
-use ParagonIE\Paserk\PaserkException;
-use ParagonIE\Paserk\PaserkTypeInterface;
-use ParagonIE\Paserk\Util;
-use ParagonIE\Paseto\ProtocolCollection;
-use ParagonIE\Paseto\ProtocolInterface;
+use ParagonIE\ConstantTime\{
+    Base64UrlSafe,
+    Binary
+};
+use ParagonIE\Paserk\{
+    ConstraintTrait,
+    PaserkException,
+    PaserkTypeInterface,
+    Util
+};
+use ParagonIE\Paseto\{
+    Exception\InvalidVersionException,
+    KeyInterface,
+    Keys\SymmetricKey,
+    ProtocolCollection,
+    ProtocolInterface
+};
 use function
     count,
     explode,

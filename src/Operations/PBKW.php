@@ -3,8 +3,6 @@ declare(strict_types=1);
 namespace ParagonIE\Paserk\Operations;
 
 use ParagonIE\HiddenString\HiddenString;
-use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
-use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paserk\Operations\PBKW\{
     PBKWv1,
     PBKWv2,
@@ -12,8 +10,11 @@ use ParagonIE\Paserk\Operations\PBKW\{
     PBKWv4
 };
 use ParagonIE\Paserk\PaserkException;
+use ParagonIE\Paseto\Keys\{
+    AsymmetricSecretKey,
+    SymmetricKey
+};
 use ParagonIE\Paseto\ProtocolInterface;
-
 use function
     array_pop,
     explode,
@@ -43,7 +44,7 @@ class PBKW
 
     /**
      * @param ProtocolInterface $version
-     * @return static
+     * @return self
      * @throws PaserkException
      */
     public static function forVersion(ProtocolInterface $version): self

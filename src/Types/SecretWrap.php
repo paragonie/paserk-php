@@ -14,6 +14,7 @@ use ParagonIE\Paseto\Keys\{
     SymmetricKey
 };
 use ParagonIE\Paseto\ProtocolCollection;
+use SodiumException;
 use function array_key_exists;
 
 /**
@@ -41,8 +42,10 @@ class SecretWrap implements PaserkTypeInterface
     }
 
     /**
+     * Quick and easy constructor-alternative for using the Pie wrapper.
+     *
      * @param SymmetricKey $key
-     * @return static
+     * @return self
      *
      * @throws InvalidVersionException
      */
@@ -101,7 +104,7 @@ class SecretWrap implements PaserkTypeInterface
      *
      * @throws InvalidVersionException
      * @throws PaserkException
-     * @throws \SodiumException
+     * @throws SodiumException
      */
     public function id(KeyInterface $key): string
     {

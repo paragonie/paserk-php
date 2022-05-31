@@ -2,18 +2,26 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
-use ParagonIE\ConstantTime\{Base64, Base64UrlSafe, Binary};
-use ParagonIE\Paserk\ConstraintTrait;
-use ParagonIE\Paseto\Exception\InvalidVersionException;
-use ParagonIE\Paseto\KeyInterface;
-use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
-use ParagonIE\Paserk\PaserkException;
-use ParagonIE\Paserk\PaserkTypeInterface;
-use ParagonIE\Paserk\Util;
-use ParagonIE\Paseto\Protocol\Version1;
+use ParagonIE\ConstantTime\{
+    Base64,
+    Base64UrlSafe,
+    Binary
+};
+use ParagonIE\Paserk\{
+    ConstraintTrait,
+    PaserkException,
+    PaserkTypeInterface,
+    Util
+};
+use ParagonIE\Paseto\{
+    Exception\InvalidVersionException,
+    KeyInterface,
+    Keys\AsymmetricSecretKey,
+    Protocol\Version1,
+    ProtocolCollection,
+    ProtocolInterface
+};
 use Exception;
-use ParagonIE\Paseto\ProtocolCollection;
-use ParagonIE\Paseto\ProtocolInterface;
 use function
     chunk_split,
     count,
@@ -42,6 +50,8 @@ class SecretType implements PaserkTypeInterface
     }
 
     /**
+     * Decode a PASERK string into a PASETO secret key
+     *
      * @param string $paserk
      * @return KeyInterface
      *
@@ -70,6 +80,8 @@ class SecretType implements PaserkTypeInterface
     }
 
     /**
+     * Special decoding rules for PASETO v1 secret keys
+     *
      * @param string $encoded
      * @return AsymmetricSecretKey
      * @throws \Exception
@@ -89,6 +101,8 @@ class SecretType implements PaserkTypeInterface
     }
 
     /**
+     * Encode a PASETO secret key into a PASERK string
+     *
      * @param KeyInterface $key
      * @return string
      *
@@ -128,8 +142,11 @@ class SecretType implements PaserkTypeInterface
     }
 
     /**
+     * Special encoding rules for PASETO v1 secret keys
+     *
      * @param string $pk
      * @return string
+     *
      * @throws PaserkException
      */
     public function encodeV1(string $pk): string

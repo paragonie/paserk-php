@@ -2,8 +2,10 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Operations;
 
-use ParagonIE\Paseto\KeyInterface;
-use ParagonIE\Paseto\ProtocolInterface;
+use ParagonIE\Paseto\{
+    KeyInterface,
+    ProtocolInterface
+};
 
 /**
  * Interface WrapInterface

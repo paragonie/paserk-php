@@ -12,7 +12,11 @@ use ParagonIE\EasyECC\{
     ECDSA\PublicKey,
     ECDSA\SecretKey
 };
-use ParagonIE\Paseto\ProtocolInterface;
+use ParagonIE\Paseto\{
+    ProtocolInterface,
+    Keys\SymmetricKey,
+    Protocol\Version3
+};
 use ParagonIE\Paserk\Operations\Key\{
     SealingPublicKey,
     SealingSecretKey
@@ -23,9 +27,8 @@ use ParagonIE\Paserk\Operations\{
 };
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Util;
-use ParagonIE\Paseto\Keys\SymmetricKey;
-use ParagonIE\Paseto\Protocol\Version3;
 use Exception;
+use TypeError;
 use function
     hash,
     hash_equals,
@@ -159,7 +162,13 @@ class PKEv3 implements PKEInterface
         $eph_pk = PublicKey::fromString(Hex::encode($eph_pk_compressed), 'P384');
 
         $xk = $easyECC->scalarmult($seal_sk, $eph_pk);
-        $pk_compressed = $seal_sk->getPublicKey()->toString();
+
+        /** @var PublicKey $pk_obj */
+        $pk_obj = $seal_sk->getPublicKey();
+        if (!($pk_obj instanceof PublicKey)) {
+            throw new TypeError("An unexpected type violation occurred");
+        }
+        $pk_compressed = $pk_obj->toString();
 
         // Step 2:
         $Ak = hash(

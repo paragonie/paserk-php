@@ -10,6 +10,12 @@ trait ConstraintTrait
     /** @var ?ProtocolCollection $collection */
     protected $collection;
 
+    /**
+     * Specify the allowed protocols for this PASERK type.
+     *
+     * @param ProtocolCollection|null $collection
+     * @return self
+     */
     public function setProtocolsAllowed(?ProtocolCollection $collection = null): self
     {
         $this->collection = $collection;
@@ -17,6 +23,8 @@ trait ConstraintTrait
     }
 
     /**
+     * Throw a PASERK exception if the given PASETO version isn't permitted.
+     *
      * @param ProtocolInterface $given
      * @return void
      *

@@ -11,6 +11,8 @@ use ParagonIE\Paseto\ProtocolInterface;
 interface IdInterface
 {
     /**
+     * Get the PASERK type label for this ID
+     *
      * @return string
      */
     public static function getTypeLabel(): string;
@@ -18,6 +20,7 @@ interface IdInterface
     /**
      * Calculate the Key-ID for a given PASERK.
      *
+     * @param ProtocolInterface $version
      * @param string $paserk
      * @return string
      */

@@ -2,8 +2,10 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Operations;
 
-use ParagonIE\Paserk\Operations\Key\SealingPublicKey;
-use ParagonIE\Paserk\Operations\Key\SealingSecretKey;
+use ParagonIE\Paserk\Operations\Key\{
+    SealingPublicKey,
+    SealingSecretKey
+};
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\ProtocolInterface;
 

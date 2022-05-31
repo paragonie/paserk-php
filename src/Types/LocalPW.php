@@ -3,16 +3,20 @@ declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
 use ParagonIE\HiddenString\HiddenString;
-use ParagonIE\Paserk\ConstraintTrait;
-use ParagonIE\Paserk\Operations\PBKW;
-use ParagonIE\Paserk\PaserkException;
-use ParagonIE\Paserk\PaserkTypeInterface;
-use ParagonIE\Paserk\Util;
-use ParagonIE\Paseto\Exception\InvalidVersionException;
-use ParagonIE\Paseto\KeyInterface;
-use ParagonIE\Paseto\Keys\SymmetricKey;
-use ParagonIE\Paseto\ProtocolCollection;
-use ParagonIE\Paseto\ProtocolInterface;
+use ParagonIE\Paserk\{
+    ConstraintTrait,
+    Operations\PBKW,
+    PaserkException,
+    PaserkTypeInterface,
+    Util
+};
+use ParagonIE\Paseto\{
+    Exception\InvalidVersionException,
+    KeyInterface,
+    Keys\SymmetricKey,
+    ProtocolCollection,
+    ProtocolInterface
+};
 use function
     array_key_exists,
     explode;

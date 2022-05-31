@@ -6,10 +6,6 @@ use ParagonIE\ConstantTime\{
     Base64UrlSafe,
     Binary
 };
-use ParagonIE\Paseto\KeyInterface;
-use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
-use ParagonIE\Paseto\Protocol\Version2;
-use ParagonIE\Paseto\ProtocolInterface;
 use ParagonIE\Paserk\Operations\Key\{
     SealingPublicKey,
     SealingSecretKey
@@ -20,7 +16,11 @@ use ParagonIE\Paserk\Operations\{
 };
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Util;
-use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\{
+    Keys\SymmetricKey,
+    Protocol\Version2,
+    ProtocolInterface
+};
 use SodiumException;
 use function
     hash_equals,

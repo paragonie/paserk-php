@@ -18,7 +18,11 @@ use SodiumException;
 class Util
 {
     /**
+     * Given a PASERK version identifier string ("kX"), return the PASETO protocol
+     * that corresponds to this version.
+     *
      * @param string $version
+     *
      * @return ProtocolInterface
      * @throws PaserkException
      */
@@ -39,6 +43,8 @@ class Util
     }
 
     /**
+     * Given a PASETO protocol version, return the PASERK version identifier string ("kX").
+     *
      * @param ProtocolInterface $pasetoVersion
      * @return string
      * @throws PaserkException
@@ -61,8 +67,15 @@ class Util
     }
 
     /**
+     * Attempt to wipe memory.
+     *
+     * If you have ext/sodium installed, sodium_memzero() will do the trick.
+     *
+     * If you don't, we'll do a best-effort with a self-XOR to zero. This
+     * isn't guaranteed to work. If you care about security, use ext/sodium.
+     *
      * @param string $byref
-     * @psalm-param-out string $byref
+     * @psalm-param-out ?string $byref
      */
     public static function wipe(string &$byref): void
     {
@@ -70,6 +83,7 @@ class Util
             sodium_memzero($byref);
         } catch (SodiumException $ex) {
             $byref ^= $byref;
+            unset($byref);
         }
     }
 }

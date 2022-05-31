@@ -3,17 +3,20 @@ declare(strict_types=1);
 namespace ParagonIE\Paserk\Types;
 
 use ParagonIE\HiddenString\HiddenString;
-use ParagonIE\Paserk\ConstraintTrait;
-use ParagonIE\Paserk\Operations\PBKW;
-use ParagonIE\Paserk\PaserkException;
-use ParagonIE\Paserk\PaserkTypeInterface;
-use ParagonIE\Paserk\Util;
-use ParagonIE\Paseto\Exception\InvalidVersionException;
-use ParagonIE\Paseto\KeyInterface;
-use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
-
-use ParagonIE\Paseto\ProtocolCollection;
-use ParagonIE\Paseto\ProtocolInterface;
+use ParagonIE\Paserk\{
+    ConstraintTrait,
+    Operations\PBKW,
+    PaserkException,
+    PaserkTypeInterface,
+    Util
+};
+use ParagonIE\Paseto\{
+    Exception\InvalidVersionException,
+    KeyInterface,
+    Keys\AsymmetricSecretKey,
+    ProtocolCollection,
+    ProtocolInterface
+};
 use function
     array_key_exists,
     explode;
@@ -43,8 +46,11 @@ class SecretPW implements PaserkTypeInterface
      * @param ProtocolInterface ...$version
      * @throws InvalidVersionException
      */
-    public function __construct(HiddenString $password, array $options = [], ProtocolInterface ...$version)
-    {
+    public function __construct(
+        HiddenString $password,
+        array $options = [],
+        ProtocolInterface ...$version
+    ) {
         $this->password = $password;
         $this->options = $options;
         $this->localCache = [];
@@ -56,6 +62,8 @@ class SecretPW implements PaserkTypeInterface
     }
 
     /**
+     * Decode a PASERK string into a PASETO secret key
+     *
      * @param string $paserk
      * @return KeyInterface
      *
@@ -75,8 +83,12 @@ class SecretPW implements PaserkTypeInterface
     }
 
     /**
+     * Encode a PASETO secret key into a PASERK string
+     *
      * @param KeyInterface $key
      * @return string
+     *
+     * @throws InvalidVersionException
      * @throws PaserkException
      */
     public function encode(KeyInterface $key): string
