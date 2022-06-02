@@ -33,7 +33,7 @@ use function
 trait IdCommonTrait
 {
     /**
-     * @param mixed[] $args
+     * @param array $args
      * @throws PaserkException
      */
     final public static function decode(...$args): void
