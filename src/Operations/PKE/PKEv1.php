@@ -89,6 +89,27 @@ class PKEv1 implements PKEInterface
         $r = random_bytes(512);
         $r0 = unpack('C', $r[0])[1];
         $r[0] = pack('C', ($r0 | 0x40) & 0x7f);
+        /*********************************************************************\
+         * CRYPTOGRAPHY ENGINEERING NOTE FROM PARAGON INITIATIVE ENTERPRISES *
+         *********************************************************************
+         * To illustrate what's happening here:                              *
+         *                                                                   *
+         * r[0]        = [xxxxxxxx] (unknown random bits)                    *
+         * r[0] | 0x40 = [x1xxxxxx] set second-highest bit                   *
+         * r[0] & 0x7f = [01xxxxxx] clear highest bit                        *
+         *                                                                   *
+         * Given that we require N to be 4096 bits in length (see above      *
+         * check), this guarantees that r < N (regardless of the remaining   *
+         * `x` bits).                                                        *
+         *                                                                   *
+         * It does, however, prevent multiplications from bailing out too    *
+         * early (i.e. if we only cleared the highest bit) and leaking the   *
+         * number of leading 0 bits in a given multiplication, since the     *
+         * number of leading 0 bits is now always exactly 1.                 *
+         *                                                                   *
+         * If we had a constant-time bigint compare function, we would have  *
+         * used that instead of this bit of cleverness.                      *
+        \*********************************************************************/
 
         // Step 2:
         $c = $rsa->encrypt($r);
