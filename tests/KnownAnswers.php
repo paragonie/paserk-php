@@ -6,8 +6,6 @@ use ParagonIE\ConstantTime\Binary;
 use ParagonIE\Paseto\ProtocolInterface;
 use PHPUnit\Framework\TestCase;
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -23,7 +21,7 @@ abstract class KnownAnswers extends TestCase
     public function setUp(): void
     {
         $this->dir = __DIR__ . '/test-vectors';
-        $this->versions = [new Version1, new Version2, new Version3, new Version4];
+        $this->versions = [new Version3, new Version4];
     }
 
     /**
@@ -63,24 +61,16 @@ abstract class KnownAnswers extends TestCase
         return $decodedFile;
     }
 
+    /**
+     * @throws \Exception
+     */
     protected function getProtocol(string $test): ProtocolInterface
     {
         $header = Binary::safeSubstr($test, 0, 2);
-        switch ($header) {
-            case 'v1':
-            case 'k1':
-                return new Version1();
-            case 'v2':
-            case 'k2':
-                return new Version2();
-            case 'v3':
-            case 'k3':
-                return new Version3();
-            case 'v4':
-            case 'k4':
-                return new Version4();
-            default:
-                throw new \Exception("Unknown protocol: {$test}");
-        }
+        return match ($header) {
+            'v3', 'k3' => new Version3(),
+            'v4', 'k4' => new Version4(),
+            default => throw new \Exception("Unknown protocol: {$test}"),
+        };
     }
 }

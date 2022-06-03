@@ -6,14 +6,11 @@ use FG\ASN1\Exception\ParserException;
 use ParagonIE\ConstantTime\Hex;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Tests\KnownAnswers;
-use ParagonIE\Paserk\Types\Lid;
 use ParagonIE\Paserk\Types\Pid;
 use ParagonIE\Paseto\Exception\PasetoException;
 use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
 use ParagonIE\Paseto\ProtocolInterface;
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -23,16 +20,6 @@ use ParagonIE\Paseto\Protocol\{
  */
 class PidTest extends KnownAnswers
 {
-    public function testV1()
-    {
-        $this->doJsonTest(new Version1(), 'k1.pid.json');
-    }
-
-    public function testV2()
-    {
-        $this->doJsonTest(new Version2(), 'k2.pid.json');
-    }
-
     public function testV3()
     {
         $this->doJsonTest(new Version3(), 'k3.pid.json');
@@ -48,9 +35,6 @@ class PidTest extends KnownAnswers
      */
     protected function getPublicKey(ProtocolInterface $version, string $key): AsymmetricPublicKey
     {
-        if ($version instanceof Version1) {
-            return new AsymmetricPublicKey($key, $version);
-        }
         return new AsymmetricPublicKey(Hex::decode($key), $version);
     }
 

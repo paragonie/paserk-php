@@ -2,7 +2,6 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Operations\Key;
 
-use ParagonIE\Paserk\PaserkException;
 use ParagonIE\EasyECC\ECDSA\{
     PublicKey,
     SecretKey
@@ -13,9 +12,8 @@ use ParagonIE\Paseto\Keys\{
     AsymmetricSecretKey
 };
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
-    Version3
+    Version3,
+    Version4
 };
 use ParagonIE\Paseto\ProtocolInterface;
 use ParagonIE\Paseto\Util;
@@ -46,14 +44,8 @@ class SealingSecretKey extends AsymmetricSecretKey
      */
     public static function generate(ProtocolInterface $protocol = null): AsymmetricSecretKey
     {
-        $protocol = $protocol ?? new Version2;
-
-        if (hash_equals($protocol::header(), Version1::HEADER)) {
-            $rsa = Version1::getRsa();
-            /** @var array<string, string> $keypair */
-            $keypair = $rsa->createKey(4096);
-            return new self(Util::dos2unix($keypair['privatekey']), $protocol);
-        } elseif (hash_equals($protocol::header(), Version3::HEADER)) {
+        $protocol = $protocol ?? new Version4;
+        if (hash_equals($protocol::header(), Version3::HEADER)) {
             return new self(
                 Util::dos2unix(SecretKey::generate(Version3::CURVE)->exportPem()),
                 $protocol
@@ -69,14 +61,11 @@ class SealingSecretKey extends AsymmetricSecretKey
 
     /**
      * @return AsymmetricSecretKey
-     * @throws PaserkException
+     *
+     * @throws Exception
      */
     public function toPasetoKey(): AsymmetricSecretKey
     {
-        if ($this->protocol instanceof Version1) {
-            throw new PaserkException("Version 1 keys cannot be converted!");
-        }
-
         return new AsymmetricSecretKey(
             $this->key,
             $this->protocol
@@ -92,11 +81,6 @@ class SealingSecretKey extends AsymmetricSecretKey
     public function getPublicKey(): AsymmetricPublicKey
     {
         switch ($this->protocol::header()) {
-            case Version1::HEADER:
-                return new SealingPublicKey(
-                    Version1::RsaGetPublicKey($this->key),
-                    $this->protocol
-                );
             case Version3::HEADER:
                 /** @var PublicKey $pk */
                 $pk = SecretKey::importPem($this->key)->getPublicKey();

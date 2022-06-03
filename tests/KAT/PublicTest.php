@@ -12,8 +12,6 @@ use ParagonIE\Paseto\Exception\PasetoException;
 use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
 use ParagonIE\Paseto\ProtocolInterface;
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -23,16 +21,6 @@ use ParagonIE\Paseto\Protocol\{
  */
 class PublicTest extends KnownAnswers
 {
-    public function testV1()
-    {
-        $this->doJsonTest(new Version1(), 'k1.public.json');
-    }
-
-    public function testV2()
-    {
-        $this->doJsonTest(new Version2(), 'k2.public.json');
-    }
-
     public function testV3()
     {
         $this->doJsonTest(new Version3(), 'k3.public.json');
@@ -45,9 +33,6 @@ class PublicTest extends KnownAnswers
 
     protected function getPublicKey(ProtocolInterface $version, string $key): AsymmetricPublicKey
     {
-        if ($version instanceof Version1) {
-            return new AsymmetricPublicKey($key, $version);
-        }
         return new AsymmetricPublicKey(Hex::decode($key), $version);
     }
 

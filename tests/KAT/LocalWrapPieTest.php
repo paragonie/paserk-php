@@ -5,12 +5,11 @@ namespace ParagonIE\Paserk\Tests\KAT;
 use ParagonIE\ConstantTime\Hex;
 use ParagonIE\Paserk\Operations\Wrap;
 use ParagonIE\Paserk\Operations\Wrap\Pie;
+use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Types\LocalWrap;
 use ParagonIE\Paserk\Tests\KnownAnswers;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -21,16 +20,6 @@ use ParagonIE\Paseto\ProtocolInterface;
  */
 class LocalWrapPieTest extends KnownAnswers
 {
-    public function testV1()
-    {
-        $this->doJsonTest(new Version1(), 'k1.local-wrap.pie.json');
-    }
-
-    public function testV2()
-    {
-        $this->doJsonTest(new Version2(), 'k2.local-wrap.pie.json');
-    }
-
     public function testV3()
     {
         $this->doJsonTest(new Version3(), 'k3.local-wrap.pie.json');
@@ -45,6 +34,8 @@ class LocalWrapPieTest extends KnownAnswers
      * @param ProtocolInterface $version
      * @param string $name
      * @param array $tests
+     *
+     * @throws PaserkException
      */
     protected function genericTest(ProtocolInterface $version, string $name, array $tests): void
     {

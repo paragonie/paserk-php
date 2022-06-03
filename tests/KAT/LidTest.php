@@ -9,8 +9,6 @@ use ParagonIE\Paserk\Types\Lid;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\ProtocolInterface;
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -20,16 +18,6 @@ use ParagonIE\Paseto\Protocol\{
  */
 class LidTest extends KnownAnswers
 {
-    public function testV1()
-    {
-        $this->doJsonTest(new Version1(), 'k1.lid.json');
-    }
-
-    public function testV2()
-    {
-        $this->doJsonTest(new Version2(), 'k2.lid.json');
-    }
-
     public function testV3()
     {
         $this->doJsonTest(new Version3(), 'k3.lid.json');

@@ -3,7 +3,6 @@ declare(strict_types=1);
 namespace ParagonIE\Paserk\Operations\Wrap;
 
 use ParagonIE\ConstantTime\{
-    Base64,
     Base64UrlSafe,
     Binary
 };
@@ -14,8 +13,6 @@ use ParagonIE\Paseto\Keys\{
 };
 use ParagonIE\Paseto\ProtocolInterface;
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -49,8 +46,7 @@ class Pie implements WrapInterface
     const DOMAIN_SEPARATION_ENCRYPT = "\x80";
     const DOMAIN_SEPARATION_AUTH = "\x81";
 
-    /** @var SymmetricKey $wrappingKey */
-    protected $wrappingKey;
+    protected SymmetricKey $wrappingKey;
 
     /**
      * Pie constructor.
@@ -91,11 +87,11 @@ class Pie implements WrapInterface
         // Step 1: Algorithm Lucidity
         $this->throwIfVersionsMismatch($key->getProtocol());
         $protocol = $key->getProtocol();
-        if ($protocol instanceof Version1 || $protocol instanceof Version3) {
-            return $this->wrapKeyV1V3($header, $key);
+        if ($protocol instanceof Version3) {
+            return $this->wrapKeyV3($header, $key);
         }
-        if ($protocol instanceof Version2 || $protocol instanceof Version4) {
-            return $this->wrapKeyV2V4($header, $key);
+        if ($protocol instanceof Version4) {
+            return $this->wrapKeyV4($header, $key);
         }
         throw new PaserkException('Unknown key version');
     }
@@ -110,7 +106,7 @@ class Pie implements WrapInterface
      * @return string
      * @throws Exception
      */
-    protected function wrapKeyV1V3(string $header, KeyInterface $key): string
+    protected function wrapKeyV3(string $header, KeyInterface $key): string
     {
         // Step 2:
         $n = random_bytes(32);
@@ -181,7 +177,7 @@ class Pie implements WrapInterface
      * @throws Exception
      * @throws SodiumException
      */
-    protected function wrapKeyV2V4(string $header, KeyInterface $key): string
+    protected function wrapKeyV4(string $header, KeyInterface $key): string
     {
         // Step 2:
         $n = random_bytes(32);
@@ -237,22 +233,10 @@ class Pie implements WrapInterface
             throw new PaserkException('Key is not wrapped with the PIE key-wrapping protocol');
         }
         $header = implode('.', array_slice($pieces, 0, 3)) . '.';
-        if (in_array($pieces[0], ['k1', 'k3'], true)) {
+        if ($pieces[0] === 'k3') {
             // We're in v1 or v3 mode.
-            $bytes = $this->unwrapKeyV1V3($header, $pieces[3]);
-            if ($pieces[0] === 'k1' && $pieces[1] === 'secret-wrap') {
-                // Handle RSA private keys
-                if (strpos($bytes, '-----BEGIN RSA PRIVATE KEY-----') !== 0) {
-                    $b64 = Base64::encode($bytes);
-                    $bytes = '-----BEGIN RSA PRIVATE KEY-----' . "\n" .
-                        chunk_split($b64, 64, "\n") .
-                        '-----END RSA PRIVATE KEY-----';
-                }
-                if (Binary::safeStrlen($bytes) < 1600) {
-                    throw new PaserkException("Unwrapped RSA secret key is too small");
-                }
-                // If we're here, we have a valid PEM-encoded RSA private key.
-            } elseif ($pieces[0] === 'k3' && $pieces[1] === 'secret-wrap') {
+            $bytes = $this->unwrapKeyV3($header, $pieces[3]);
+            if ($pieces[1] === 'secret-wrap') {
                 // Handle ECDSA private keys
                 if (Binary::safeStrlen($bytes) !== 48) {
                     throw new PaserkException("Unwrapped ECDSA secret key must be 48 bytes");
@@ -262,9 +246,9 @@ class Pie implements WrapInterface
                 throw new PaserkException("Unwrapped local keys must be 32 bytes");
             }
             // If we're here, we have a valid RSA/ECDSA secret key or 256-bit symmetric key.
-        } elseif (in_array($pieces[0], ['k2', 'k4'], true)) {
+        } elseif ($pieces[0] === 'k4') {
             // We're in v2 or v4 mode.
-            $bytes = $this->unwrapKeyV2V4($header, $pieces[3]);
+            $bytes = $this->unwrapKeyV4($header, $pieces[3]);
             if ($pieces[1] === 'secret-wrap') {
                 if (Binary::safeStrlen($bytes) !== 64) {
                     throw new PaserkException("Unwrapped Ed25519 secret keys must be 64 bytes");
@@ -301,7 +285,7 @@ class Pie implements WrapInterface
      * @return string
      * @throws PaserkException
      */
-    protected function unwrapKeyV1V3(string $header, string $encoded): string
+    protected function unwrapKeyV3(string $header, string $encoded): string
     {
         // Step 1:
         $decoded = Base64UrlSafe::decode($encoded);
@@ -376,7 +360,7 @@ class Pie implements WrapInterface
      * @throws PaserkException
      * @throws SodiumException
      */
-    protected function unwrapKeyV2V4(string $header, string $encoded): string
+    protected function unwrapKeyV4(string $header, string $encoded): string
     {
         // Step 1:
         $decoded = Base64UrlSafe::decode($encoded);

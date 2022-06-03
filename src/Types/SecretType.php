@@ -17,18 +17,16 @@ use ParagonIE\Paseto\{
     Exception\InvalidVersionException,
     KeyInterface,
     Keys\AsymmetricSecretKey,
-    Protocol\Version1,
     ProtocolCollection,
     ProtocolInterface
 };
 use Exception;
+use SodiumException;
 use function
-    chunk_split,
     count,
     explode,
     hash_equals,
-    implode,
-    preg_replace;
+    implode;
 
 /**
  * Class SecretType
@@ -71,33 +69,9 @@ class SecretType implements PaserkTypeInterface
         $this->throwIfInvalidProtocol($version);
         /// @SPEC DETAIL: Algorithm Lucidity
 
-        if ($pieces[0] === 'k1') {
-            return $this->decodeV1($pieces[2]);
-        }
         $rawKey = Base64UrlSafe::decode($pieces[2]);
         $this->throwIfWrongKeyLength($version, Binary::safeStrlen($rawKey));
         return new AsymmetricSecretKey($rawKey, $version);
-    }
-
-    /**
-     * Special decoding rules for PASETO v1 secret keys
-     *
-     * @param string $encoded
-     * @return AsymmetricSecretKey
-     * @throws \Exception
-     */
-    public function decodeV1(string $encoded): AsymmetricSecretKey
-    {
-        $raw = Base64UrlSafe::decode($encoded);
-        $length = Binary::safeStrlen($raw);
-        if ($length < 1180) {
-            throw new PaserkException("Secret key is too short: {$length}");
-        }
-        $b64 = Base64::encode($raw);
-        $pem = '-----BEGIN RSA PRIVATE KEY-----' . "\n" .
-            chunk_split($b64, 64, "\n") .
-            '-----END RSA PRIVATE KEY-----';
-        return new AsymmetricSecretKey($pem, new Version1());
     }
 
     /**
@@ -118,13 +92,6 @@ class SecretType implements PaserkTypeInterface
 
         $version = Util::getPaserkHeader($key->getProtocol());
         switch ($version) {
-            case 'k1':
-                return implode('.', [
-                    $version,
-                    self::getTypeLabel(),
-                    $this->encodeV1($key->raw())
-                ]);
-            case 'k2':
             case 'k3':
             case 'k4':
                 $this->throwIfWrongKeyLength(
@@ -142,25 +109,6 @@ class SecretType implements PaserkTypeInterface
     }
 
     /**
-     * Special encoding rules for PASETO v1 secret keys
-     *
-     * @param string $pk
-     * @return string
-     *
-     * @throws PaserkException
-     */
-    public function encodeV1(string $pk): string
-    {
-        $pem = preg_replace('#-{3,}(BEGIN|END) [^-]+-{3,}#', '', $pk);
-        $decoded = Base64::decode(preg_replace('#[^A-Za-z0-9+/]#', '', $pem));
-        $length = Binary::safeStrlen($decoded);
-        if ($length < 1180) {
-            throw new PaserkException("Secret key is too short: {$length}");
-        }
-        return Base64UrlSafe::encodeUnpadded($decoded);
-    }
-
-    /**
      * @return string
      */
     public static function getTypeLabel(): string
@@ -173,8 +121,9 @@ class SecretType implements PaserkTypeInterface
      *
      * @param KeyInterface $key
      * @return string
+     *
      * @throws PaserkException
-     * @throws \SodiumException
+     * @throws SodiumException
      */
     public function id(KeyInterface $key): string
     {
@@ -190,19 +139,13 @@ class SecretType implements PaserkTypeInterface
     private function throwIfWrongKeyLength(ProtocolInterface $protocol, int $length): void
     {
         switch ($protocol::header()) {
-            case 'v1':
-                if ($length > 290) {
-                    return;
-                }
-                break;
-            case 'v2':
-            case 'v4':
-                if ($length === 64) {
-                    return;
-                }
-                break;
             case 'v3':
                 if ($length > 47) {
+                    return;
+                }
+                break;
+            case 'v4':
+                if ($length === 64) {
                     return;
                 }
                 break;

@@ -12,8 +12,6 @@ use ParagonIE\Paserk\Operations\Key\{
     SealingPublicKey
 };
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -24,16 +22,6 @@ use ParagonIE\Paseto\ProtocolInterface;
  */
 class SealTest extends KnownAnswers
 {
-    public function testV1()
-    {
-        $this->doJsonTest(new Version1(), 'k1.seal.json');
-    }
-
-    public function testV2()
-    {
-        $this->doJsonTest(new Version2(), 'k2.seal.json');
-    }
-
     public function testV3()
     {
         $this->doJsonTest(new Version3(), 'k3.seal.json');
@@ -51,7 +39,7 @@ class SealTest extends KnownAnswers
     protected function genericTest(ProtocolInterface $version, string $name, array $tests): void
     {
         foreach ($tests as $test) {
-            if ($version::header() === 'v1' || $version::header() === 'v3') {
+            if ($version::header() === 'v3') {
                 $sk = new SealingSecretKey($test['sealing-secret-key'], $version);
                 $pk = new SealingPublicKey($test['sealing-public-key'], $version);
             } else {

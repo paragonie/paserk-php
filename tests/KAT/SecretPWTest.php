@@ -8,8 +8,6 @@ use ParagonIE\HiddenString\HiddenString;
 use ParagonIE\Paserk\Types\SecretPW;
 use ParagonIE\Paserk\Tests\KnownAnswers;
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -20,16 +18,6 @@ use ParagonIE\Paseto\ProtocolInterface;
  */
 class SecretPWTest extends KnownAnswers
 {
-    public function testV1()
-    {
-        $this->doJsonTest(new Version1(), 'k1.secret-pw.json');
-    }
-
-    public function testV2()
-    {
-        $this->doJsonTest(new Version2(), 'k2.secret-pw.json');
-    }
-
     public function testV3()
     {
         $this->doJsonTest(new Version3(), 'k3.secret-pw.json');

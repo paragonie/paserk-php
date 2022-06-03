@@ -7,8 +7,6 @@ use ParagonIE\Paserk\Operations\Key\SealingSecretKey;
 use ParagonIE\Paserk\Operations\PKE;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -29,8 +27,6 @@ class PKETest extends TestCase
     public function setUp(): void
     {
         $this->versions = [
-            new Version1(),
-            new Version2(),
             new Version3(),
             new Version4()
         ];

@@ -11,8 +11,6 @@ use ParagonIE\Paseto\Exception\PasetoException;
 use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 use ParagonIE\Paseto\ProtocolInterface;
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -22,16 +20,6 @@ use ParagonIE\Paseto\Protocol\{
  */
 class SidTest extends KnownAnswers
 {
-    public function testV1()
-    {
-        $this->doJsonTest(new Version1(), 'k1.sid.json');
-    }
-
-    public function testV2()
-    {
-        $this->doJsonTest(new Version2(), 'k2.sid.json');
-    }
-
     public function testV3()
     {
         $this->doJsonTest(new Version3(), 'k3.sid.json');
@@ -44,9 +32,6 @@ class SidTest extends KnownAnswers
 
     protected function getSecretKey(ProtocolInterface $version, string $key): AsymmetricSecretKey
     {
-        if ($version instanceof Version1) {
-            return new AsymmetricSecretKey($key, $version);
-        }
         return new AsymmetricSecretKey(Hex::decode($key), $version);
     }
 

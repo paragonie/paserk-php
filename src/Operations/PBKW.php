@@ -4,8 +4,6 @@ namespace ParagonIE\Paserk\Operations;
 
 use ParagonIE\HiddenString\HiddenString;
 use ParagonIE\Paserk\Operations\PBKW\{
-    PBKWv1,
-    PBKWv2,
     PBKWv3,
     PBKWv4
 };
@@ -31,7 +29,7 @@ class PBKW
     const DOMAIN_SEPARATION_AUTH = "\xfe";
 
     /** @var PBKWInterface $wrapper */
-    protected $wrapper;
+    protected PBKWInterface $wrapper;
 
     /**
      * PBKW constructor.
@@ -50,10 +48,6 @@ class PBKW
     public static function forVersion(ProtocolInterface $version): self
     {
         switch ($version::header()) {
-            case 'v1':
-                return new PBKW(new PBKWv1());
-            case 'v2':
-                return new PBKW(new PBKWv2());
             case 'v3':
                 return new PBKW(new PBKWv3());
             case 'v4':
