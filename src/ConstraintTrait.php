@@ -8,7 +8,7 @@ use ParagonIE\Paseto\ProtocolInterface;
 trait ConstraintTrait
 {
     /** @var ?ProtocolCollection $collection */
-    protected ?ProtocolCollection $collection;
+    protected ?ProtocolCollection $collection = null;
 
     /**
      * Specify the allowed protocols for this PASERK type.
