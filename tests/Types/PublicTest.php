@@ -2,12 +2,13 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Tests\Types;
 
+use Exception;
 use ParagonIE\Paserk\PaserkException;
+use ParagonIE\Paseto\Exception\InvalidVersionException;
+use ParagonIE\Paseto\Exception\PasetoException;
 use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
 use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -28,7 +29,7 @@ class PublicTest extends TestCase
     protected AsymmetricSecretKey $v4sk;
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function setUp(): void
     {
@@ -38,6 +39,11 @@ class PublicTest extends TestCase
         $this->v4pk = $this->v4sk->getPublicKey();
     }
 
+    /**
+     * @throws InvalidVersionException
+     * @throws PaserkException
+     * @throws PasetoException
+     */
     public function testEncodeDecode()
     {
         /** @var AsymmetricPublicKey $key */
@@ -53,6 +59,10 @@ class PublicTest extends TestCase
         }
     }
 
+    /**
+     * @throws PaserkException
+     * @throws PasetoException
+     */
     public function testRejectSecret()
     {
         $public = new PublicType();

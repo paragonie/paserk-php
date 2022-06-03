@@ -28,12 +28,26 @@ class PKE
     const DOMAIN_SEPARATION_ENCRYPT = "\x01";
     const DOMAIN_SEPARATION_AUTH = "\x02";
 
-    /** @var ProtocolInterface $version */
     protected ProtocolInterface $version;
 
     public function __construct(ProtocolInterface $version)
     {
         $this->version = $version;
+    }
+
+    /**
+     * @return PKEInterface
+     * @throws PaserkException
+     */
+    public function getSealer(): PKEInterface
+    {
+        return match ($this->version::header()) {
+            'v3' => new PKEv3(),
+            'v4' => new PKEv4(),
+            default => throw new PaserkException(
+                'Unknown version: ' . $this->version::header()
+            ),
+        };
     }
 
     /**
@@ -55,21 +69,6 @@ class PKE
 
         $sealer = $this->getSealer();
         return $sealer::header() . $sealer->seal($ptk, $pk);
-    }
-
-    /**
-     * @return PKEInterface
-     * @throws PaserkException
-     */
-    public function getSealer(): PKEInterface
-    {
-        return match ($this->version::header()) {
-            'v3' => new PKEv3(),
-            'v4' => new PKEv4(),
-            default => throw new PaserkException(
-                'Unknown version: ' . $this->version::header()
-            ),
-        };
     }
 
     /**

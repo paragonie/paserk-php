@@ -23,7 +23,7 @@ use PHPUnit\Framework\TestCase;
 class PBKWTest extends TestCase
 {
     /** @var ProtocolInterface[] */
-    protected $versions = [];
+    protected array $versions = [];
 
     public function setUp(): void
     {

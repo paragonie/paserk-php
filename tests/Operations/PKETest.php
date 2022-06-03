@@ -22,7 +22,7 @@ use PHPUnit\Framework\TestCase;
 class PKETest extends TestCase
 {
     /** @var ProtocolInterface[] */
-    protected $versions = [];
+    protected array $versions = [];
 
     public function setUp(): void
     {

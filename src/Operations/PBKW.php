@@ -28,7 +28,6 @@ class PBKW
     const DOMAIN_SEPARATION_ENCRYPT = "\xff";
     const DOMAIN_SEPARATION_AUTH = "\xfe";
 
-    /** @var PBKWInterface $wrapper */
     protected PBKWInterface $wrapper;
 
     /**

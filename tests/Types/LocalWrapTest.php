@@ -2,14 +2,20 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Tests\Types;
 
-use ParagonIE\Paserk\Types\Lid;
-use ParagonIE\Paserk\Types\LocalWrap;
+use Exception;
+use ParagonIE\Paserk\{
+    PaserkException,
+    Types\Lid,
+    Types\LocalWrap
+};
+use ParagonIE\Paseto\Exception\InvalidVersionException;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\Protocol\{
     Version3,
     Version4
 };
 use PHPUnit\Framework\TestCase;
+use SodiumException;
 
 /**
  * Class LocalWrapTest
@@ -22,12 +28,20 @@ class LocalWrapTest extends TestCase
     protected SymmetricKey $v3key;
     protected SymmetricKey $v4key;
 
+    /**
+     * @throws Exception
+     */
     public function setUp(): void
     {
         $this->v3key = SymmetricKey::generate(new Version3());
         $this->v4key = SymmetricKey::generate(new Version4());
     }
 
+    /**
+     * @throws PaserkException
+     * @throws InvalidVersionException
+     * @throws SodiumException
+     */
     public function testWrap()
     {
         /** @var SymmetricKey $key */

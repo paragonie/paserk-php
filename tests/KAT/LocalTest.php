@@ -6,6 +6,7 @@ use ParagonIE\ConstantTime\Hex;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Tests\KnownAnswers;
 use ParagonIE\Paserk\Types\Local;
+use ParagonIE\Paseto\Exception\InvalidVersionException;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\ProtocolInterface;
 use ParagonIE\Paseto\Protocol\{
@@ -29,6 +30,7 @@ class LocalTest extends KnownAnswers
     }
 
     /**
+     * @throws InvalidVersionException
      * @throws PaserkException
      */
     protected function genericTest(ProtocolInterface $version, string $name, array $tests): void

@@ -13,10 +13,10 @@ use ParagonIE\Paseto\Protocol\{
 abstract class KnownAnswers extends TestCase
 {
     /** @var string $dir */
-    protected $dir;
+    protected string $dir;
 
     /** @var ProtocolInterface[] $versions */
-    protected $versions;
+    protected array $versions;
 
     public function setUp(): void
     {

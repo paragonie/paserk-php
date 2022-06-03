@@ -4,9 +4,11 @@ namespace ParagonIE\Paserk\Tests\Types;
 
 use ParagonIE\Paserk\Types\SecretWrap;
 use ParagonIE\Paserk\Types\Sid;
-use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
-use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
-use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\Keys\{
+    AsymmetricPublicKey,
+    AsymmetricSecretKey,
+    SymmetricKey
+};
 use ParagonIE\Paseto\Protocol\{
     Version3,
     Version4

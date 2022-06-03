@@ -10,6 +10,7 @@ use ParagonIE\Paserk\Types\Pid;
 use ParagonIE\Paseto\Exception\PasetoException;
 use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
 use ParagonIE\Paseto\ProtocolInterface;
+use SodiumException;
 use ParagonIE\Paseto\Protocol\{
     Version3,
     Version4
@@ -38,6 +39,14 @@ class PidTest extends KnownAnswers
         return new AsymmetricPublicKey(Hex::decode($key), $version);
     }
 
+    /**
+     * @param ProtocolInterface $version
+     * @param string $name
+     * @param array $tests
+     *
+     * @throws PaserkException
+     * @throws SodiumException
+     */
     protected function genericTest(ProtocolInterface $version, string $name, array $tests): void
     {
         foreach ($tests as $test) {

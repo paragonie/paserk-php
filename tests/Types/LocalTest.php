@@ -5,6 +5,8 @@ namespace ParagonIE\Paserk\Tests\Types;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Types\Local;
 use ParagonIE\Paserk\Types\PublicType;
+use ParagonIE\Paseto\Exception\InvalidVersionException;
+use ParagonIE\Paseto\Exception\PasetoException;
 use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\Protocol\{
@@ -21,8 +23,8 @@ use PHPUnit\Framework\TestCase;
  */
 class LocalTest extends TestCase
 {
-    protected $v3key;
-    protected $v4key;
+    protected SymmetricKey $v3key;
+    protected SymmetricKey $v4key;
 
     public function setUp(): void
     {
@@ -32,6 +34,7 @@ class LocalTest extends TestCase
 
     /**
      * @throws PaserkException
+     * @throws InvalidVersionException
      */
     public function testEncode()
     {
@@ -48,6 +51,10 @@ class LocalTest extends TestCase
         }
     }
 
+    /**
+     * @throws PaserkException
+     * @throws PasetoException
+     */
     public function testRejectPublic()
     {
         $keypair = AsymmetricSecretKey::generate(new Version4());

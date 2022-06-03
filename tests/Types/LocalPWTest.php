@@ -21,7 +21,7 @@ use PHPUnit\Framework\TestCase;
 class LocalPWTest extends TestCase
 {
     /** @var ProtocolInterface[] */
-    protected $versions = [];
+    protected array $versions = [];
 
     public function setUp(): void
     {

@@ -31,6 +31,12 @@ class SecretTest extends KnownAnswers
         $this->doJsonTest(new Version4(), 'k4.secret.json');
     }
 
+    /**
+     * @param ProtocolInterface $version
+     * @param string $key
+     * @return AsymmetricSecretKey
+     * @throws Exception
+     */
     protected function getSecretKey(ProtocolInterface $version, string $key): AsymmetricSecretKey
     {
         return new AsymmetricSecretKey(Hex::decode($key), $version);

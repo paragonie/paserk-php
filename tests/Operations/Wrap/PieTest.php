@@ -18,8 +18,8 @@ use PHPUnit\Framework\TestCase;
  */
 class PieTest extends TestCase
 {
-    protected $v3 = [];
-    protected $v4 = [];
+    protected array $v3 = [];
+    protected array $v4 = [];
 
     public function setUp(): void
     {

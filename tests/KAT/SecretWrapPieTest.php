@@ -6,8 +6,8 @@ use ParagonIE\ConstantTime\Hex;
 use ParagonIE\Paserk\Operations\Wrap;
 use ParagonIE\Paserk\Operations\Wrap\Pie;
 use ParagonIE\Paserk\PaserkException;
-use ParagonIE\Paserk\Types\SecretWrap;
 use ParagonIE\Paserk\Tests\KnownAnswers;
+use ParagonIE\Paserk\Types\SecretWrap;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\Protocol\{
     Version3,

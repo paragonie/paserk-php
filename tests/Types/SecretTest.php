@@ -12,6 +12,7 @@ use ParagonIE\Paseto\Protocol\{
 };
 use PHPUnit\Framework\TestCase;
 use ParagonIE\Paserk\Types\SecretType;
+use Exception;
 
 /**
  * Class PublicTest
@@ -27,7 +28,7 @@ class SecretTest extends TestCase
     protected AsymmetricSecretKey $v4sk;
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function setUp(): void
     {

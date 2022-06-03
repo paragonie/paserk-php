@@ -31,6 +31,13 @@ class PublicTest extends KnownAnswers
         $this->doJsonTest(new Version4(), 'k4.public.json');
     }
 
+    /**
+     * @param ProtocolInterface $version
+     * @param string $key
+     * @return AsymmetricPublicKey
+     *
+     * @throws Exception
+     */
     protected function getPublicKey(ProtocolInterface $version, string $key): AsymmetricPublicKey
     {
         return new AsymmetricPublicKey(Hex::decode($key), $version);

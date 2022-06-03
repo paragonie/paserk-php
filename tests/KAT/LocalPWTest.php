@@ -7,6 +7,7 @@ use ParagonIE\HiddenString\HiddenString;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Types\LocalPW;
 use ParagonIE\Paserk\Tests\KnownAnswers;
+use ParagonIE\Paseto\Exception\InvalidVersionException;
 use ParagonIE\Paseto\Protocol\{
     Version3,
     Version4
@@ -34,6 +35,7 @@ class LocalPWTest extends KnownAnswers
      * @param string $name
      * @param array $tests
      *
+     * @throws InvalidVersionException
      * @throws PaserkException
      */
     protected function genericTest(ProtocolInterface $version, string $name, array $tests): void
