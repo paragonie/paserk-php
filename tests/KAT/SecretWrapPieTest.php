@@ -9,6 +9,7 @@ use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Tests\KnownAnswers;
 use ParagonIE\Paserk\Types\SecretWrap;
 use ParagonIE\Paseto\Keys\SymmetricKey;
+use Throwable;
 use ParagonIE\Paseto\Protocol\{
     Version3,
     Version4
@@ -45,7 +46,7 @@ class SecretWrapPieTest extends KnownAnswers
             if ($test['expect-fail']) {
                 try {
                     $wrapper->decode($test['paserk']);
-                } catch (\Throwable $exception) {
+                } catch (Throwable $exception) {
                     continue;
                 }
                 $this->fail($name . ' > ' . $test['name'] . ': '. $test['comment']);

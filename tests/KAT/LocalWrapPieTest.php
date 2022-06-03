@@ -14,6 +14,7 @@ use ParagonIE\Paseto\Protocol\{
     Version4
 };
 use ParagonIE\Paseto\ProtocolInterface;
+use Throwable;
 
 /**
  * @covers LocalWrap
@@ -45,7 +46,7 @@ class LocalWrapPieTest extends KnownAnswers
             if ($test['expect-fail']) {
                 try {
                     $wrapper->decode($test['paserk']);
-                } catch (\Throwable $exception) {
+                } catch (Throwable $exception) {
                     continue;
                 }
                 $this->fail($name . ' > ' . $test['name'] . ': '. $test['comment']);

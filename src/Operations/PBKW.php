@@ -13,6 +13,7 @@ use ParagonIE\Paseto\Keys\{
     SymmetricKey
 };
 use ParagonIE\Paseto\ProtocolInterface;
+use TypeError;
 use function
     array_pop,
     explode,
@@ -99,7 +100,7 @@ class PBKW
             $password
         );
         if (!($unwrapped instanceof SymmetricKey)) {
-            throw new \TypeError();
+            throw new TypeError();
         }
         return $unwrapped;
     }
@@ -148,7 +149,7 @@ class PBKW
             $password
         );
         if (!($unwrapped instanceof AsymmetricSecretKey)) {
-            throw new \TypeError();
+            throw new TypeError();
         }
         return $unwrapped;
     }

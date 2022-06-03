@@ -150,6 +150,6 @@ class SecretType implements PaserkTypeInterface
                 }
                 break;
         }
-        throw new PaserkException("Invalid secret key length: {$length}");
+        throw new PaserkException("Invalid secret key length: $length");
     }
 }

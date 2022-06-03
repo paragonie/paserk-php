@@ -11,6 +11,7 @@ use ParagonIE\Paserk\Types\SecretType;
 use ParagonIE\Paseto\Exception\PasetoException;
 use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 use ParagonIE\Paseto\ProtocolInterface;
+use RangeException;
 use ParagonIE\Paseto\Protocol\{
     Version3,
     Version4
@@ -56,7 +57,7 @@ class SecretTest extends KnownAnswers
                     try {
                         $secret->decode($test['paserk']);
                         $this->fail($test['name'] . ': ' . $test['comment']);
-                    } catch (ParserException | \RangeException | PasetoException | PaserkException $ex) {
+                    } catch (ParserException | RangeException | PasetoException | PaserkException $ex) {
                     }
                     continue;
                 }
@@ -65,7 +66,7 @@ class SecretTest extends KnownAnswers
                     $secretkey = $this->getSecretKey($version, $test['key']);
                     $secret->encode($secretkey);
                     $this->fail($test['name'] . ': '. $test['comment']);
-                } catch (ParserException | \RangeException | PasetoException | PaserkException $ex) {
+                } catch (ParserException | RangeException | PasetoException | PaserkException $ex) {
                 }
                 continue;
             }

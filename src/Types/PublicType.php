@@ -108,6 +108,7 @@ class PublicType implements PaserkTypeInterface
      * @return string
      *
      * @throws PaserkException
+     * @throws PasetoException
      * @throws SodiumException
      */
     public function id(KeyInterface $key): string

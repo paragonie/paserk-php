@@ -12,6 +12,7 @@ use ParagonIE\Paseto\Exception\InvalidVersionException;
 use ParagonIE\Paseto\Exception\PasetoException;
 use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 use ParagonIE\Paseto\ProtocolInterface;
+use RangeException;
 use SodiumException;
 use ParagonIE\Paseto\Protocol\{
     Version3,
@@ -62,7 +63,7 @@ class SidTest extends KnownAnswers
                     $secretkey = $this->getSecretKey($version, $test['key']);
                     Sid::encodeSecret($secretkey);
                     $this->fail($test['name'] . ': '. $test['comment']);
-                } catch (ParserException | \RangeException | PasetoException | PaserkException $ex) {
+                } catch (ParserException | RangeException | PasetoException | PaserkException $ex) {
                 }
                 continue;
             }

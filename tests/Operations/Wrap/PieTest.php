@@ -1,9 +1,9 @@
 <?php
+/** @noinspection PhpIllegalPsrClassPathInspection */
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Tests\Wrap;
 
 use ParagonIE\Paserk\Operations\Wrap\Pie;
-use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
 use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\Protocol\Version3;

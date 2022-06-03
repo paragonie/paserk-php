@@ -69,6 +69,7 @@ class Util
         } catch (SodiumException $ex) {
             $byref ^= $byref;
             unset($byref);
+            unset($ex); // We know what this is
         }
     }
 }

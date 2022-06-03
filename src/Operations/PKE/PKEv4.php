@@ -6,6 +6,7 @@ use ParagonIE\ConstantTime\{
     Base64UrlSafe,
     Binary
 };
+use Exception;
 use ParagonIE\Paserk\Operations\Key\{
     SealingPublicKey,
     SealingSecretKey
@@ -134,8 +135,12 @@ class PKEv4 implements PKEInterface
         $this->assertKeyVersion($sk);
 
         // Step 2:
-        $xsk = sodium_crypto_sign_ed25519_sk_to_curve25519($sk->raw());
-        $xpk = sodium_crypto_sign_ed25519_pk_to_curve25519($sk->getPublicKey()->raw());
+        try {
+            $xsk = sodium_crypto_sign_ed25519_sk_to_curve25519($sk->raw());
+            $xpk = sodium_crypto_sign_ed25519_pk_to_curve25519($sk->getPublicKey()->raw());
+        } catch (Exception $ex) {
+            throw new PaserkException("Cryptographic error", 0, $ex);
+        }
 
         // Step 3:
         $xk = sodium_crypto_scalarmult($xsk, $eph_pk);

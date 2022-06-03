@@ -7,6 +7,7 @@ use ParagonIE\ConstantTime\Hex;
 use ParagonIE\HiddenString\HiddenString;
 use ParagonIE\Paserk\Types\SecretPW;
 use ParagonIE\Paserk\Tests\KnownAnswers;
+use Throwable;
 use ParagonIE\Paseto\Protocol\{
     Version3,
     Version4
@@ -46,7 +47,7 @@ class SecretPWTest extends KnownAnswers
             if ($test['expect-fail']) {
                 try {
                     $wrapper->decode($test['paserk']);
-                } catch (\Throwable $exception) {
+                } catch (Throwable $exception) {
                     continue;
                 }
                 $this->fail($name . ' > ' . $test['name'] . ': '. $test['comment']);

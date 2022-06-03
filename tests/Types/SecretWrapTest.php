@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Tests\Types;
 
+use Exception;
 use ParagonIE\Paserk\Types\SecretWrap;
 use ParagonIE\Paserk\Types\Sid;
 use ParagonIE\Paseto\Keys\{
@@ -29,7 +30,7 @@ class SecretWrapTest extends TestCase
     protected AsymmetricSecretKey $v4sk;
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function setUp(): void
     {

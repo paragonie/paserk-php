@@ -9,6 +9,7 @@ use ParagonIE\Paseto\Protocol\{
     Version3,
     Version4
 };
+use Exception;
 
 abstract class KnownAnswers extends TestCase
 {
@@ -70,7 +71,7 @@ abstract class KnownAnswers extends TestCase
         return match ($header) {
             'v3', 'k3' => new Version3(),
             'v4', 'k4' => new Version4(),
-            default => throw new \Exception("Unknown protocol: {$test}"),
+            default => throw new Exception("Unknown protocol: $test"),
         };
     }
 }

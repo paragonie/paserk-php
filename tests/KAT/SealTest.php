@@ -11,6 +11,7 @@ use ParagonIE\Paserk\Operations\Key\{
     SealingSecretKey,
     SealingPublicKey
 };
+use Throwable;
 use ParagonIE\Paseto\Protocol\{
     Version3,
     Version4
@@ -50,7 +51,7 @@ class SealTest extends KnownAnswers
             if ($test['expect-fail']) {
                 try {
                     $processor->decode($test['paserk']);
-                } catch (\Throwable $exception) {
+                } catch (Throwable $exception) {
                     continue;
                 }
                 $this->fail($name . ' > ' . $test['name'] . ': '. $test['comment']);

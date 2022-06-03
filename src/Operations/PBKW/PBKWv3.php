@@ -144,7 +144,8 @@ class PBKWv3 implements PBKWInterface
      * @param string $wrapped
      * @param HiddenString $password
      * @return KeyInterface
-     * @throws \Exception
+     *
+     * @throws Exception
      */
     public function unwrapWithPassword(
         string $header,

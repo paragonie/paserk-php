@@ -11,6 +11,7 @@ use ParagonIE\Paserk\Types\PublicType;
 use ParagonIE\Paseto\Exception\PasetoException;
 use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
 use ParagonIE\Paseto\ProtocolInterface;
+use RangeException;
 use ParagonIE\Paseto\Protocol\{
     Version3,
     Version4
@@ -56,7 +57,7 @@ class PublicTest extends KnownAnswers
                     try {
                         $public->decode($test['paserk']);
                         $this->fail($test['name'] . ': ' . $test['comment']);
-                    } catch (ParserException | \RangeException | PasetoException | PaserkException $ex) {
+                    } catch (ParserException | RangeException | PasetoException | PaserkException $ex) {
                     }
                     continue;
                 }
@@ -65,7 +66,7 @@ class PublicTest extends KnownAnswers
                     $publickey = $this->getPublicKey($version, $test['key']);
                     $public->encode($publickey);
                     $this->fail($test['name'] . ': '. $test['comment']);
-                } catch (ParserException | \RangeException | PasetoException | PaserkException $ex) {
+                } catch (ParserException | RangeException | PasetoException | PaserkException $ex) {
                 }
                 continue;
             }

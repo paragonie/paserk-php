@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Tests\KAT;
 
+use Exception;
 use FG\ASN1\Exception\ParserException;
 use ParagonIE\ConstantTime\Hex;
 use ParagonIE\Paserk\PaserkException;
@@ -10,6 +11,7 @@ use ParagonIE\Paserk\Types\Pid;
 use ParagonIE\Paseto\Exception\PasetoException;
 use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
 use ParagonIE\Paseto\ProtocolInterface;
+use RangeException;
 use SodiumException;
 use ParagonIE\Paseto\Protocol\{
     Version3,
@@ -32,7 +34,7 @@ class PidTest extends KnownAnswers
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getPublicKey(ProtocolInterface $version, string $key): AsymmetricPublicKey
     {
@@ -55,7 +57,7 @@ class PidTest extends KnownAnswers
                     $publickey = $this->getPublicKey($version, $test['key']);
                     Pid::encodePublic($publickey);
                     $this->fail($test['name'] . ': '. $test['comment']);
-                } catch (ParserException | \RangeException | PasetoException | PaserkException $ex) {
+                } catch (ParserException | RangeException | PasetoException | PaserkException $ex) {
                 }
                 continue;
             }
