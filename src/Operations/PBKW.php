@@ -4,8 +4,6 @@ namespace ParagonIE\Paserk\Operations;
 
 use ParagonIE\HiddenString\HiddenString;
 use ParagonIE\Paserk\Operations\PBKW\{
-    PBKWv1,
-    PBKWv2,
     PBKWv3,
     PBKWv4
 };
@@ -15,6 +13,7 @@ use ParagonIE\Paseto\Keys\{
     SymmetricKey
 };
 use ParagonIE\Paseto\ProtocolInterface;
+use TypeError;
 use function
     array_pop,
     explode,
@@ -30,8 +29,7 @@ class PBKW
     const DOMAIN_SEPARATION_ENCRYPT = "\xff";
     const DOMAIN_SEPARATION_AUTH = "\xfe";
 
-    /** @var PBKWInterface $wrapper */
-    protected $wrapper;
+    protected PBKWInterface $wrapper;
 
     /**
      * PBKW constructor.
@@ -50,10 +48,6 @@ class PBKW
     public static function forVersion(ProtocolInterface $version): self
     {
         switch ($version::header()) {
-            case 'v1':
-                return new PBKW(new PBKWv1());
-            case 'v2':
-                return new PBKW(new PBKWv2());
             case 'v3':
                 return new PBKW(new PBKWv3());
             case 'v4':
@@ -106,7 +100,7 @@ class PBKW
             $password
         );
         if (!($unwrapped instanceof SymmetricKey)) {
-            throw new \TypeError();
+            throw new TypeError();
         }
         return $unwrapped;
     }
@@ -155,7 +149,7 @@ class PBKW
             $password
         );
         if (!($unwrapped instanceof AsymmetricSecretKey)) {
-            throw new \TypeError();
+            throw new TypeError();
         }
         return $unwrapped;
     }

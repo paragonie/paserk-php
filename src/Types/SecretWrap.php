@@ -26,10 +26,10 @@ class SecretWrap implements PaserkTypeInterface
     use ConstraintTrait;
 
     /** @var array<string, string> */
-    protected $localCache = [];
+    protected array $localCache = [];
 
     /** @var Wrap $wrap */
-    protected $wrap;
+    protected Wrap $wrap;
 
     /**
      * SecretWrap constructor.

@@ -7,28 +7,19 @@ use ParagonIE\HiddenString\HiddenString;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Types\LocalPW;
 use ParagonIE\Paserk\Tests\KnownAnswers;
+use ParagonIE\Paseto\Exception\InvalidVersionException;
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
 use ParagonIE\Paseto\ProtocolInterface;
+use Throwable;
 
 /**
  * @covers LocalPW
  */
 class LocalPWTest extends KnownAnswers
 {
-    public function testV1()
-    {
-        $this->doJsonTest(new Version1(), 'k1.local-pw.json');
-    }
-
-    public function testV2()
-    {
-        $this->doJsonTest(new Version2(), 'k2.local-pw.json');
-    }
 
     public function testV3()
     {
@@ -45,6 +36,7 @@ class LocalPWTest extends KnownAnswers
      * @param string $name
      * @param array $tests
      *
+     * @throws InvalidVersionException
      * @throws PaserkException
      */
     protected function genericTest(ProtocolInterface $version, string $name, array $tests): void
@@ -58,7 +50,7 @@ class LocalPWTest extends KnownAnswers
             if ($test['expect-fail']) {
                 try {
                     $wrapper->decode($test['paserk']);
-                } catch (\Throwable $exception) {
+                } catch (Throwable $exception) {
                     continue;
                 }
                 $this->fail($name . ' > ' . $test['name'] . ': '. $test['comment']);

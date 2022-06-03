@@ -18,6 +18,17 @@ The PASERK Specification can be found [in this repository](https://github.com/pa
 composer require paragonie/paserk
 ```
 
+### PASERK Library Versions
+
+* PASERK PHP Version 2
+  * Requires PHP 8.1+
+  * PASETO versions: `v3`, `v4`
+    * This means only the corresponding `k3` and `k4` modes are implemented.
+* [PASERK PHP Version 1](https://github.com/paragonie/paserk-php/tree/v1.x)
+  * Requires PHP 7.1+
+  * PASETO versions: `v1`, `v2`, `v3`, `v4`
+    * This provides a stable reference implementation for the PASERK specification.
+
 ## Documentation
 
 See [this directory](docs) for the documentation.

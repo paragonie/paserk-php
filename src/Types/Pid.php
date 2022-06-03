@@ -8,6 +8,8 @@ use ParagonIE\Paserk\{
     IdInterface,
     PaserkException
 };
+use ParagonIE\Paseto\Exception\InvalidVersionException;
+use ParagonIE\Paseto\Exception\PasetoException;
 use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
 use SodiumException;
 
@@ -22,6 +24,7 @@ class Pid implements IdInterface
     /**
      * @param AsymmetricPublicKey $pk
      * @return string
+     *
      * @throws PaserkException
      * @throws SodiumException
      */
@@ -30,8 +33,8 @@ class Pid implements IdInterface
         try {
             $version = $pk->getProtocol();
             return self::encode($version, (new PublicType($version))->encode($pk));
-        } catch (ParserException $ex) {
-            throw new PaserkException("Invalid public key");
+        } catch (InvalidVersionException|ParserException|PasetoException|PaserkException $ex) {
+            throw new PaserkException("Invalid public key", 0, $ex);
         }
     }
 

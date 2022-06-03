@@ -17,6 +17,7 @@ use ParagonIE\Paseto\{
     Keys\SymmetricKey,
     ProtocolCollection
 };
+use SodiumException;
 use function array_key_exists;
 
 /**
@@ -28,10 +29,10 @@ class LocalWrap implements PaserkTypeInterface
     use ConstraintTrait;
 
     /** @var array<string, string> */
-    protected $localCache = [];
+    protected array $localCache = [];
 
     /** @var Wrap $wrap */
-    protected $wrap;
+    protected Wrap $wrap;
 
     /**
      * LocalWrap constructor.
@@ -103,7 +104,7 @@ class LocalWrap implements PaserkTypeInterface
      *
      * @throws InvalidVersionException
      * @throws PaserkException
-     * @throws \SodiumException
+     * @throws SodiumException
      */
     public function id(KeyInterface $key): string
     {

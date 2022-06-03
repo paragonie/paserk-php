@@ -19,6 +19,7 @@ use ParagonIE\Paseto\{
     ProtocolCollection,
     ProtocolInterface
 };
+use SodiumException;
 use function
     count,
     explode,
@@ -108,7 +109,7 @@ class Local implements PaserkTypeInterface
      * @param KeyInterface $key
      * @return string
      * @throws PaserkException
-     * @throws \SodiumException
+     * @throws SodiumException
      */
     public function id(KeyInterface $key): string
     {

@@ -18,7 +18,7 @@ use TypeError;
 class Wrap
 {
     /** @var WrapInterface $wrapper */
-    protected $wrapper;
+    protected WrapInterface $wrapper;
 
     /**
      * Wrap constructor.

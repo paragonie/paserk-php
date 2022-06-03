@@ -6,11 +6,10 @@ use ParagonIE\ConstantTime\Hex;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Tests\KnownAnswers;
 use ParagonIE\Paserk\Types\Local;
+use ParagonIE\Paseto\Exception\InvalidVersionException;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\ProtocolInterface;
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -20,16 +19,6 @@ use ParagonIE\Paseto\Protocol\{
  */
 class LocalTest extends KnownAnswers
 {
-    public function testV1()
-    {
-        $this->doJsonTest(new Version1(), 'k1.local.json');
-    }
-
-    public function testV2()
-    {
-        $this->doJsonTest(new Version2(), 'k2.local.json');
-    }
-
     public function testV3()
     {
         $this->doJsonTest(new Version3(), 'k3.local.json');
@@ -41,6 +30,7 @@ class LocalTest extends KnownAnswers
     }
 
     /**
+     * @throws InvalidVersionException
      * @throws PaserkException
      */
     protected function genericTest(ProtocolInterface $version, string $name, array $tests): void

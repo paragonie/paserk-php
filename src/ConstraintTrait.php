@@ -8,15 +8,15 @@ use ParagonIE\Paseto\ProtocolInterface;
 trait ConstraintTrait
 {
     /** @var ?ProtocolCollection $collection */
-    protected $collection;
+    protected ?ProtocolCollection $collection = null;
 
     /**
      * Specify the allowed protocols for this PASERK type.
      *
      * @param ProtocolCollection|null $collection
-     * @return self
+     * @return static
      */
-    public function setProtocolsAllowed(?ProtocolCollection $collection = null): self
+    public function setProtocolsAllowed(?ProtocolCollection $collection = null): static
     {
         $this->collection = $collection;
         return $this;

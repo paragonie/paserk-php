@@ -17,6 +17,7 @@ use ParagonIE\Paseto\{
     ProtocolCollection,
     ProtocolInterface
 };
+use SodiumException;
 use function
     array_key_exists,
     explode;
@@ -30,13 +31,13 @@ class LocalPW implements PaserkTypeInterface
     use ConstraintTrait;
 
     /** @var array<string, string> */
-    protected $localCache = [];
+    protected array $localCache = [];
 
     /** @var array $options */
-    protected $options;
+    protected array $options;
 
     /** @var HiddenString $password */
-    protected $password;
+    protected HiddenString $password;
 
     /**
      * LocalPW constructor.
@@ -79,6 +80,8 @@ class LocalPW implements PaserkTypeInterface
     /**
      * @param KeyInterface $key
      * @return string
+     *
+     * @throws InvalidVersionException
      * @throws PaserkException
      */
     public function encode(KeyInterface $key): string
@@ -111,8 +114,9 @@ class LocalPW implements PaserkTypeInterface
      * @param KeyInterface $key
      * @return string
      *
+     * @throws InvalidVersionException
      * @throws PaserkException
-     * @throws \SodiumException
+     * @throws SodiumException
      */
     public function id(KeyInterface $key): string
     {

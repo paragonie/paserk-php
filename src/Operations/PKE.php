@@ -3,8 +3,6 @@ declare(strict_types=1);
 namespace ParagonIE\Paserk\Operations;
 
 use ParagonIE\Paserk\Operations\PKE\{
-    PKEv1,
-    PKEv2,
     PKEv3,
     PKEv4
 };
@@ -30,12 +28,26 @@ class PKE
     const DOMAIN_SEPARATION_ENCRYPT = "\x01";
     const DOMAIN_SEPARATION_AUTH = "\x02";
 
-    /** @var ProtocolInterface $version */
-    protected $version;
+    protected ProtocolInterface $version;
 
     public function __construct(ProtocolInterface $version)
     {
         $this->version = $version;
+    }
+
+    /**
+     * @return PKEInterface
+     * @throws PaserkException
+     */
+    public function getSealer(): PKEInterface
+    {
+        return match ($this->version::header()) {
+            'v3' => new PKEv3(),
+            'v4' => new PKEv4(),
+            default => throw new PaserkException(
+                'Unknown version: ' . $this->version::header()
+            ),
+        };
     }
 
     /**
@@ -57,28 +69,6 @@ class PKE
 
         $sealer = $this->getSealer();
         return $sealer::header() . $sealer->seal($ptk, $pk);
-    }
-
-    /**
-     * @return PKEInterface
-     * @throws PaserkException
-     */
-    public function getSealer(): PKEInterface
-    {
-        switch ($this->version::header()) {
-            case 'v1':
-                return new PKEv1();
-            case 'v2':
-                return new PKEv2();
-            case 'v3':
-                return new PKEv3();
-            case 'v4':
-                return new PKEv4();
-            default:
-                throw new PaserkException(
-                    'Unknown version: ' . $this->version::header()
-                );
-        }
     }
 
     /**

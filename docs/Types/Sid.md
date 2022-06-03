@@ -5,7 +5,7 @@ Example code:
 ```php
 <?php
 use ParagonIE\Paserk\Types\Sid;
-use ParagonIE\Paseto\Protocol\Version2;
+use ParagonIE\Paseto\Protocol\Version3;
 use ParagonIE\Paseto\Protocol\Version4;
 use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 
@@ -14,20 +14,20 @@ $exampleSecretKeyV4 = AsymmetricSecretKey::generate(new Version4());
 $secretIdV4 = Sid::encodeSecret($exampleSecretKeyV4);
 var_dump($secretIdV4);
 
-// Now let's change the version to v2
-$exampleSecretKeyV2 = new AsymmetricSecretKey($exampleSecretKeyV4->raw(), new Version2);
-$secretIdV2 = Sid::encodeSecret($exampleSecretKeyV2);
-var_dump($secretIdV2);
+// Now let's change the version to v3
+$exampleSecretKeyV3 = new AsymmetricSecretKey($exampleSecretKeyV4->raw(), new Version3);
+$secretIdV3 = Sid::encodeSecret($exampleSecretKeyV3);
+var_dump($secretIdV3);
 
 // This will always be bool(false)
-var_dump($secretIdV2 === $secretIdV4);
+var_dump($secretIdV3 === $secretIdV4);
 ```
 
 Example output:
 
 ```
 string(51) "k4.sid.Vt47YKER1_S7N2zj8CjpQMfoKdOu5l1vq_RctB9CYqhO"
-string(51) "k2.sid.sESo8mlDN5bjjO-vnZ96QJ-jrgbg-YO35emyHC19V3bD"
+string(51) "k3.sid.sESo8mlDN5bjjO-vnZ96QJ-jrgbg-YO35emyHC19V3bD"
 bool(false)
 ```
 

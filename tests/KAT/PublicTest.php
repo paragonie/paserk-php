@@ -11,9 +11,8 @@ use ParagonIE\Paserk\Types\PublicType;
 use ParagonIE\Paseto\Exception\PasetoException;
 use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
 use ParagonIE\Paseto\ProtocolInterface;
+use RangeException;
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -23,16 +22,6 @@ use ParagonIE\Paseto\Protocol\{
  */
 class PublicTest extends KnownAnswers
 {
-    public function testV1()
-    {
-        $this->doJsonTest(new Version1(), 'k1.public.json');
-    }
-
-    public function testV2()
-    {
-        $this->doJsonTest(new Version2(), 'k2.public.json');
-    }
-
     public function testV3()
     {
         $this->doJsonTest(new Version3(), 'k3.public.json');
@@ -43,11 +32,15 @@ class PublicTest extends KnownAnswers
         $this->doJsonTest(new Version4(), 'k4.public.json');
     }
 
+    /**
+     * @param ProtocolInterface $version
+     * @param string $key
+     * @return AsymmetricPublicKey
+     *
+     * @throws Exception
+     */
     protected function getPublicKey(ProtocolInterface $version, string $key): AsymmetricPublicKey
     {
-        if ($version instanceof Version1) {
-            return new AsymmetricPublicKey($key, $version);
-        }
         return new AsymmetricPublicKey(Hex::decode($key), $version);
     }
 
@@ -64,7 +57,7 @@ class PublicTest extends KnownAnswers
                     try {
                         $public->decode($test['paserk']);
                         $this->fail($test['name'] . ': ' . $test['comment']);
-                    } catch (ParserException | \RangeException | PasetoException | PaserkException $ex) {
+                    } catch (ParserException | RangeException | PasetoException | PaserkException $ex) {
                     }
                     continue;
                 }
@@ -73,7 +66,7 @@ class PublicTest extends KnownAnswers
                     $publickey = $this->getPublicKey($version, $test['key']);
                     $public->encode($publickey);
                     $this->fail($test['name'] . ': '. $test['comment']);
-                } catch (ParserException | \RangeException | PasetoException | PaserkException $ex) {
+                } catch (ParserException | RangeException | PasetoException | PaserkException $ex) {
                 }
                 continue;
             }

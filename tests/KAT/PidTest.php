@@ -2,18 +2,18 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Tests\KAT;
 
+use Exception;
 use FG\ASN1\Exception\ParserException;
 use ParagonIE\ConstantTime\Hex;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Tests\KnownAnswers;
-use ParagonIE\Paserk\Types\Lid;
 use ParagonIE\Paserk\Types\Pid;
 use ParagonIE\Paseto\Exception\PasetoException;
 use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
 use ParagonIE\Paseto\ProtocolInterface;
+use RangeException;
+use SodiumException;
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -23,16 +23,6 @@ use ParagonIE\Paseto\Protocol\{
  */
 class PidTest extends KnownAnswers
 {
-    public function testV1()
-    {
-        $this->doJsonTest(new Version1(), 'k1.pid.json');
-    }
-
-    public function testV2()
-    {
-        $this->doJsonTest(new Version2(), 'k2.pid.json');
-    }
-
     public function testV3()
     {
         $this->doJsonTest(new Version3(), 'k3.pid.json');
@@ -44,16 +34,21 @@ class PidTest extends KnownAnswers
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getPublicKey(ProtocolInterface $version, string $key): AsymmetricPublicKey
     {
-        if ($version instanceof Version1) {
-            return new AsymmetricPublicKey($key, $version);
-        }
         return new AsymmetricPublicKey(Hex::decode($key), $version);
     }
 
+    /**
+     * @param ProtocolInterface $version
+     * @param string $name
+     * @param array $tests
+     *
+     * @throws PaserkException
+     * @throws SodiumException
+     */
     protected function genericTest(ProtocolInterface $version, string $name, array $tests): void
     {
         foreach ($tests as $test) {
@@ -62,7 +57,7 @@ class PidTest extends KnownAnswers
                     $publickey = $this->getPublicKey($version, $test['key']);
                     Pid::encodePublic($publickey);
                     $this->fail($test['name'] . ': '. $test['comment']);
-                } catch (ParserException | \RangeException | PasetoException | PaserkException $ex) {
+                } catch (ParserException | RangeException | PasetoException | PaserkException $ex) {
                 }
                 continue;
             }

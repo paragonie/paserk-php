@@ -6,8 +6,6 @@ use ParagonIE\HiddenString\HiddenString;
 use ParagonIE\Paserk\Types\SecretPW;
 use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -23,13 +21,11 @@ use PHPUnit\Framework\TestCase;
 class SecretPWTest extends TestCase
 {
     /** @var ProtocolInterface[] */
-    protected $versions = [];
+    protected array $versions = [];
 
     public function setUp(): void
     {
         $this->versions = [
-            new Version1(),
-            new Version2(),
             new Version3(),
             new Version4()
         ];

@@ -8,6 +8,7 @@ use ParagonIE\Paserk\{
     IdInterface,
     PaserkException
 };
+use ParagonIE\Paseto\Exception\InvalidVersionException;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use SodiumException;
 
@@ -23,6 +24,7 @@ class Lid implements IdInterface
      * @param SymmetricKey $key
      * @return string
      *
+     * @throws InvalidVersionException
      * @throws PaserkException
      * @throws SodiumException
      */

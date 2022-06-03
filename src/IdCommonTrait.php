@@ -12,8 +12,6 @@ use ParagonIE\Paserk\Types\{
     Sid
 };
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -56,13 +54,13 @@ trait IdCommonTrait
     public static function encode(ProtocolInterface $version, string $paserk): string
     {
         $header = Util::getPaserkHeader($version) . '.' . self::getTypeLabel() . '.';
-        if ($version instanceof Version1 || $version instanceof Version3) {
+        if ($version instanceof Version3) {
             $hash = Binary::safeSubstr(
                 hash('sha384', $header . $paserk, true),
                 0,
                 33
             );
-        } elseif ($version instanceof Version2 || $version instanceof Version4) {
+        } elseif ($version instanceof Version4) {
             $hash = sodium_crypto_generichash(
                 $header . $paserk,
                 '',

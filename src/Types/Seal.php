@@ -32,13 +32,13 @@ class Seal implements PaserkTypeInterface
     use ConstraintTrait;
 
     /** @var SealingPublicKey $pk */
-    protected $pk;
+    protected SealingPublicKey $pk;
 
     /** @var SealingSecretKey|null $sk */
-    protected $sk = null;
+    protected ?SealingSecretKey $sk = null;
 
     /** @var array<string, string> */
-    protected $localCache = [];
+    protected array $localCache = [];
 
     /**
      * Seal constructor.

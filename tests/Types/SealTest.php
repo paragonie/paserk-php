@@ -12,10 +12,9 @@ use ParagonIE\Paserk\Types\{
     Lid,
     Seal
 };
+use ParagonIE\Paseto\Exception\InvalidVersionException;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\Protocol\{
-    Version1,
-    Version2,
     Version3,
     Version4
 };
@@ -32,13 +31,11 @@ use SodiumException;
 class SealTest extends TestCase
 {
     /** @var ProtocolInterface[] */
-    protected $versions = [];
+    protected array $versions = [];
 
     public function setUp(): void
     {
         $this->versions = [
-            new Version1(),
-            new Version2(),
             new Version3(),
             new Version4()
         ];
@@ -48,6 +45,7 @@ class SealTest extends TestCase
      * @throws NotImplementedException
      * @throws PaserkException
      * @throws SodiumException
+     * @throws InvalidVersionException
      */
     public function testSeal()
     {
