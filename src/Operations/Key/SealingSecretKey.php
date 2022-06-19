@@ -33,8 +33,6 @@ use function
 class SealingSecretKey extends AsymmetricSecretKey
 {
     /**
-     * We use 4096-bit keys for SealingSecretKey
-     *
      * @param ProtocolInterface|null $protocol
      * @return self
      *
