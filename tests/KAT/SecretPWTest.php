@@ -7,6 +7,7 @@ use ParagonIE\ConstantTime\Hex;
 use ParagonIE\HiddenString\HiddenString;
 use ParagonIE\Paserk\Types\SecretPW;
 use ParagonIE\Paserk\Tests\KnownAnswers;
+use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 use Throwable;
 use ParagonIE\Paseto\Protocol\{
     Version3,
@@ -40,7 +41,7 @@ class SecretPWTest extends KnownAnswers
     {
         foreach ($tests as $test) {
             $wrapper = new SecretPW(
-                new HiddenString(Hex::encode($test['password'])),
+                new HiddenString($test['password']),
                 $test['options'] ?? [],
                 $version
             );
@@ -51,6 +52,15 @@ class SecretPWTest extends KnownAnswers
                     continue;
                 }
                 $this->fail($name . ' > ' . $test['name'] . ': '. $test['comment']);
+            }
+            if (empty($test['paserk'])) {
+                var_dump($wrapper->encode(
+                    new AsymmetricSecretKey(
+                        Hex::decode($test['unwrapped']),
+                        $version
+                    )
+                ));
+                continue;
             }
             $unwrapped = $wrapper->decode($test['paserk']);
             if ($version::header() === 'v1') {
