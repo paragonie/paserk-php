@@ -7,6 +7,7 @@ use ParagonIE\HiddenString\HiddenString;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Types\LocalPW;
 use ParagonIE\Paserk\Tests\KnownAnswers;
+use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\Protocol\{
     Version1,
     Version2,
@@ -51,7 +52,7 @@ class LocalPWTest extends KnownAnswers
     {
         foreach ($tests as $test) {
             $wrapper = new LocalPW(
-                new HiddenString(Hex::encode($test['password'])),
+                new HiddenString($test['password']),
                 $test['options'] ?? [],
                 $version
             );
@@ -62,6 +63,15 @@ class LocalPWTest extends KnownAnswers
                     continue;
                 }
                 $this->fail($name . ' > ' . $test['name'] . ': '. $test['comment']);
+            }
+            if (empty($test['paserk'])) {
+                var_dump($wrapper->encode(
+                    new SymmetricKey(
+                        Hex::decode($test['unwrapped']),
+                        $version
+                    )
+                ));
+                continue;
             }
             $unwrapped = $wrapper->decode($test['paserk']);
             $this->assertSame(

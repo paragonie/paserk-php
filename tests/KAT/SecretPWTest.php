@@ -7,6 +7,7 @@ use ParagonIE\ConstantTime\Hex;
 use ParagonIE\HiddenString\HiddenString;
 use ParagonIE\Paserk\Types\SecretPW;
 use ParagonIE\Paserk\Tests\KnownAnswers;
+use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
 use ParagonIE\Paseto\Protocol\{
     Version1,
     Version2,
@@ -51,7 +52,7 @@ class SecretPWTest extends KnownAnswers
     {
         foreach ($tests as $test) {
             $wrapper = new SecretPW(
-                new HiddenString(Hex::encode($test['password'])),
+                new HiddenString($test['password']),
                 $test['options'] ?? [],
                 $version
             );
