@@ -81,7 +81,7 @@ class PKEv3 implements PKEInterface
         $eph_pk = $eph_sk->getPublicKey();
         $seal_pk = PublicKey::importPem($pk->raw());
 
-        $pk_compressed = $seal_pk->toString();
+        $pk_compressed = Hex::decode($seal_pk->toString());
         $eph_pk_compressed = Hex::decode($eph_pk->toString());
 
         // Step 2:
@@ -168,7 +168,7 @@ class PKEv3 implements PKEInterface
         if (!($pk_obj instanceof PublicKey)) {
             throw new TypeError("An unexpected type violation occurred");
         }
-        $pk_compressed = $pk_obj->toString();
+        $pk_compressed = Hex::decode($pk_obj->toString());
 
         // Step 2:
         $Ak = hash(
