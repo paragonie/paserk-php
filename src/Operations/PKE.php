@@ -11,7 +11,7 @@ use ParagonIE\Paserk\Operations\Key\{
     SealingSecretKey
 };
 use ParagonIE\Paserk\PaserkException;
-use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\Keys\Base\SymmetricKey;
 use ParagonIE\Paseto\ProtocolInterface;
 use function
     array_pop,

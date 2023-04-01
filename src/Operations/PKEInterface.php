@@ -6,7 +6,7 @@ use ParagonIE\Paserk\Operations\Key\{
     SealingPublicKey,
     SealingSecretKey
 };
-use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\Keys\Base\SymmetricKey;
 use ParagonIE\Paseto\ProtocolInterface;
 
 /**

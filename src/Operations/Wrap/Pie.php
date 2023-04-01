@@ -9,7 +9,7 @@ use ParagonIE\ConstantTime\{
 use ParagonIE\Paseto\KeyInterface;
 use ParagonIE\Paseto\Keys\{
     AsymmetricSecretKey,
-    SymmetricKey
+    Base\SymmetricKey
 };
 use ParagonIE\Paseto\ProtocolInterface;
 use ParagonIE\Paseto\Protocol\{

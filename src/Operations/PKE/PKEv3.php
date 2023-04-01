@@ -14,6 +14,7 @@ use ParagonIE\EasyECC\{
 };
 use ParagonIE\Paseto\{
     ProtocolInterface,
+    Keys\Base\SymmetricKey as BaseSymmetricKey,
     Keys\SymmetricKey,
     Protocol\Version3
 };
@@ -69,7 +70,7 @@ class PKEv3 implements PKEInterface
      *
      * @throws Exception
      */
-    public function seal(SymmetricKey $ptk, SealingPublicKey $pk): string
+    public function seal(BaseSymmetricKey $ptk, SealingPublicKey $pk): string
     {
         $header = self::header();
         $easyECC = new EasyECC('P384');

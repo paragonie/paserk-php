@@ -13,7 +13,7 @@ use ParagonIE\Paserk\{
 use ParagonIE\Paseto\{
     Exception\InvalidVersionException,
     KeyInterface,
-    Keys\SymmetricKey,
+    Keys\Base\SymmetricKey,
     ProtocolCollection,
     ProtocolInterface
 };

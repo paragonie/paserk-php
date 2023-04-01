@@ -60,8 +60,9 @@ class PidTest extends KnownAnswers
                 } catch (ParserException | RangeException | PasetoException | PaserkException $ex) {
                 }
                 continue;
+            } else {
+                $publickey = $this->getPublicKey($version, $test['key']);
             }
-            $publickey = $this->getPublicKey($version, $test['key']);
             $this->assertSame($test['paserk'], Pid::encodePublic($publickey), $test['name']);
         }
     }

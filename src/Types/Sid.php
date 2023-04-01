@@ -8,7 +8,7 @@ use ParagonIE\Paserk\{
     PaserkException
 };
 use ParagonIE\Paseto\Exception\InvalidVersionException;
-use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
+use ParagonIE\Paseto\Keys\Base\AsymmetricSecretKey;
 use SodiumException;
 
 /**

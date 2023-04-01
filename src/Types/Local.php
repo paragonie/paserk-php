@@ -14,7 +14,9 @@ use ParagonIE\Paserk\{
 };
 use ParagonIE\Paseto\{
     Exception\InvalidVersionException,
+    Exception\PasetoException,
     KeyInterface,
+    Keys\Base\SymmetricKey as BaseSymmetricKey,
     Keys\SymmetricKey,
     ProtocolCollection,
     ProtocolInterface
@@ -52,7 +54,7 @@ class Local implements PaserkTypeInterface
      */
     public function encode(KeyInterface $key): string
     {
-        if (!($key instanceof SymmetricKey)) {
+        if (!($key instanceof BaseSymmetricKey)) {
             throw new PaserkException('Only symmetric keys can be serialized as kx.local.');
         }
         $this->throwIfInvalidProtocol($key->getProtocol());
@@ -71,6 +73,7 @@ class Local implements PaserkTypeInterface
      * @return KeyInterface
      *
      * @throws PaserkException
+     * @throws PasetoException
      */
     public function decode(string $paserk): KeyInterface
     {

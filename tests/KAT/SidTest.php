@@ -66,8 +66,9 @@ class SidTest extends KnownAnswers
                 } catch (ParserException | RangeException | PasetoException | PaserkException $ex) {
                 }
                 continue;
+            } else {
+                $secretkey = $this->getSecretKey($version, $test['key']);
             }
-            $secretkey = $this->getSecretKey($version, $test['key']);
             $this->assertSame($test['paserk'], Sid::encodeSecret($secretkey), $test['name']);
         }
     }

@@ -14,7 +14,7 @@ use ParagonIE\Paserk\Operations\{
 use ParagonIE\Paseto\{
     Exception\InvalidVersionException,
     KeyInterface,
-    Keys\SymmetricKey,
+    Keys\Base\SymmetricKey,
     ProtocolCollection
 };
 use SodiumException;

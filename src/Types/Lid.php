@@ -9,7 +9,7 @@ use ParagonIE\Paserk\{
     PaserkException
 };
 use ParagonIE\Paseto\Exception\InvalidVersionException;
-use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\Keys\Base\SymmetricKey;
 use SodiumException;
 
 /**

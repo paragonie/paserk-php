@@ -5,7 +5,7 @@ namespace ParagonIE\Paserk\Tests\Types;
 use Exception;
 use ParagonIE\Paserk\Types\SecretWrap;
 use ParagonIE\Paserk\Types\Sid;
-use ParagonIE\Paseto\Keys\{
+use ParagonIE\Paseto\Keys\Base\{
     AsymmetricPublicKey,
     AsymmetricSecretKey,
     SymmetricKey

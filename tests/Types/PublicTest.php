@@ -6,8 +6,8 @@ use Exception;
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paseto\Exception\InvalidVersionException;
 use ParagonIE\Paseto\Exception\PasetoException;
-use ParagonIE\Paseto\Keys\AsymmetricPublicKey;
-use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
+use ParagonIE\Paseto\Keys\Base\AsymmetricPublicKey;
+use ParagonIE\Paseto\Keys\Base\AsymmetricSecretKey;
 use ParagonIE\Paseto\Protocol\{
     Version3,
     Version4

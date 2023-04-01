@@ -2,10 +2,21 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Tests\Types;
 
-use ParagonIE\Paseto\Keys\{
+use ParagonIE\Paseto\Keys\Base\{
     AsymmetricPublicKey,
     AsymmetricSecretKey
 };
+use ParagonIE\Paseto\Keys\Version3\{
+    AsymmetricPublicKey as V3AsymmetricPublicKey,
+    AsymmetricSecretKey as V3AsymmetricSecretKey
+};
+use ParagonIE\Paseto\Keys\Version4\{
+    AsymmetricPublicKey as V4AsymmetricPublicKey,
+    AsymmetricSecretKey as V4AsymmetricSecretKey
+};
+use ParagonIE\Paserk\PaserkException;
+use ParagonIE\Paseto\Exception\InvalidVersionException;
+use ParagonIE\Paseto\Exception\PasetoException;
 use ParagonIE\Paseto\Protocol\{
     Version3,
     Version4
@@ -32,12 +43,17 @@ class SecretTest extends TestCase
      */
     public function setUp(): void
     {
-        $this->v3sk = AsymmetricSecretKey::generate(new Version3());
+        $this->v3sk = V3AsymmetricSecretKey::generate();
         $this->v3pk = $this->v3sk->getPublicKey();
-        $this->v4sk = AsymmetricSecretKey::generate(new Version4());
+        $this->v4sk = V4AsymmetricSecretKey::generate(new Version4());
         $this->v4pk = $this->v4sk->getPublicKey();
     }
 
+    /**
+     * @throws PaserkException
+     * @throws InvalidVersionException
+     * @throws PasetoException
+     */
     public function testEncodeDecode()
     {
         /** @var AsymmetricPublicKey $key */

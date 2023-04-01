@@ -7,8 +7,8 @@ use ParagonIE\Paserk\Types\Local;
 use ParagonIE\Paserk\Types\PublicType;
 use ParagonIE\Paseto\Exception\InvalidVersionException;
 use ParagonIE\Paseto\Exception\PasetoException;
-use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
-use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\Keys\Base\AsymmetricSecretKey;
+use ParagonIE\Paseto\Keys\Base\SymmetricKey;
 use ParagonIE\Paseto\Protocol\{
     Version3,
     Version4

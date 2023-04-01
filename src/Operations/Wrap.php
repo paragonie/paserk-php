@@ -6,6 +6,7 @@ use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Util;
 use ParagonIE\Paseto\Keys\{
     AsymmetricSecretKey,
+    Base\SymmetricKey as BaseSymmetricKey,
     SymmetricKey
 };
 use ParagonIE\Paseto\ProtocolInterface;
@@ -38,11 +39,11 @@ class Wrap
     }
 
     /**
-     * @param SymmetricKey $key
+     * @param BaseSymmetricKey $key
      * @return string
      * @throws PaserkException
      */
-    public function localWrap(SymmetricKey $key): string
+    public function localWrap(BaseSymmetricKey $key): string
     {
         $version = Util::getPaserkHeader($key->getProtocol());
         $header = $version . '.local-wrap.' . $this->wrapper::customId() . '.';
@@ -52,12 +53,12 @@ class Wrap
 
     /**
      * @param string $key
-     * @return SymmetricKey
+     * @return BaseSymmetricKey
      */
-    public function localUnwrap(string $key): SymmetricKey
+    public function localUnwrap(string $key): BaseSymmetricKey
     {
         $unwrapped = $this->wrapper->unwrapKey($key);
-        if (!($unwrapped instanceof SymmetricKey)) {
+        if (!($unwrapped instanceof BaseSymmetricKey)) {
             throw new TypeError('Invalid type returned from unwrapKey()');
         }
         return $unwrapped;

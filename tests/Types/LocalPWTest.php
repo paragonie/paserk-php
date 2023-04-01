@@ -4,6 +4,7 @@ namespace ParagonIE\Paserk\Tests\Types;
 
 use ParagonIE\HiddenString\HiddenString;
 use ParagonIE\Paserk\Types\LocalPW;
+use ParagonIE\Paseto\Keys\Base\SymmetricKey as BaseSymmetricKey;
 use ParagonIE\Paseto\Keys\SymmetricKey;
 use ParagonIE\Paseto\Protocol\{
     Version3,
@@ -45,7 +46,7 @@ class LocalPWTest extends TestCase
             $wrapper = new LocalPW($password, $testConfig, $v);
             $sym = SymmetricKey::generate($v);
             $wrapped = $wrapper->encode($sym);
-            /** @var SymmetricKey $unwrap */
+            /** @var BaseSymmetricKey $unwrap */
             $unwrap = $wrapper->decode($wrapped);
             $this->assertSame(
                 $sym->encode(),

@@ -14,6 +14,10 @@ use ParagonIE\Paserk\Operations\{
 };
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paseto\KeyInterface;
+use ParagonIE\Paseto\Keys\Base\{
+    AsymmetricSecretKey as BaseAsymmetricSecretKey,
+    SymmetricKey as BaseSymmetricKey
+};
 use ParagonIE\Paseto\Keys\{
     AsymmetricSecretKey,
     SymmetricKey
@@ -77,9 +81,9 @@ class PBKWv3 implements PBKWInterface
         HiddenString $password,
         array $options = []
     ): string {
-        if ($key instanceof SymmetricKey) {
+        if ($key instanceof BaseSymmetricKey) {
             $header = static::localHeader();
-        } elseif ($key instanceof AsymmetricSecretKey) {
+        } elseif ($key instanceof BaseAsymmetricSecretKey) {
             $header = static::secretHeader();
         } else {
             throw new PaserkException('Invalid key type');

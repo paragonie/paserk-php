@@ -18,6 +18,7 @@ use ParagonIE\Paserk\Operations\{
 use ParagonIE\Paserk\PaserkException;
 use ParagonIE\Paserk\Util;
 use ParagonIE\Paseto\{
+    Keys\Base\SymmetricKey as BaseSymmetricKey,
     Keys\SymmetricKey,
     Protocol\Version4,
     ProtocolInterface
@@ -69,7 +70,7 @@ class PKEv4 implements PKEInterface
      * @throws PaserkException
      * @throws SodiumException
      */
-    public function seal(SymmetricKey $ptk, SealingPublicKey $pk): string
+    public function seal(BaseSymmetricKey $ptk, SealingPublicKey $pk): string
     {
         $header = static::header();
         $this->assertKeyVersion($pk);
@@ -121,7 +122,7 @@ class PKEv4 implements PKEInterface
      * @throws PaserkException
      * @throws SodiumException
      */
-    public function unseal(string $header, string $encoded, SealingSecretKey $sk): SymmetricKey
+    public function unseal(string $header, string $encoded, SealingSecretKey $sk): BaseSymmetricKey
     {
         $bin = Base64UrlSafe::decode($encoded);
         $tag = Binary::safeSubstr($bin, 0, 32);

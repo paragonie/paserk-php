@@ -8,6 +8,10 @@ use ParagonIE\Paserk\Operations\PBKW\{
     PBKWv4
 };
 use ParagonIE\Paserk\PaserkException;
+use ParagonIE\Paseto\Keys\Base\{
+    AsymmetricSecretKey as BaseAsymmetricSecretKey,
+    SymmetricKey as BaseSymmetricKey
+};
 use ParagonIE\Paseto\Keys\{
     AsymmetricSecretKey,
     SymmetricKey
@@ -63,7 +67,7 @@ class PBKW
      * @return string
      */
     public function localPwWrap(
-        SymmetricKey $key,
+        BaseSymmetricKey $key,
         HiddenString $password,
         array $options = []
     ): string {
@@ -80,7 +84,7 @@ class PBKW
     public function localPwUnwrap(
         string $paserk,
         HiddenString $password
-    ): SymmetricKey {
+    ): BaseSymmetricKey {
         $pieces = explode('.', $paserk);
         if (count($pieces) !== 3) {
             throw new PaserkException('Invalid wrapped key');
@@ -99,7 +103,7 @@ class PBKW
             $payload,
             $password
         );
-        if (!($unwrapped instanceof SymmetricKey)) {
+        if (!($unwrapped instanceof BaseSymmetricKey)) {
             throw new TypeError();
         }
         return $unwrapped;
@@ -112,7 +116,7 @@ class PBKW
      * @return string
      */
     public function secretPwWrap(
-        AsymmetricSecretKey $sk,
+        BaseAsymmetricSecretKey $sk,
         HiddenString $password,
         array $options
     ): string {
@@ -129,7 +133,7 @@ class PBKW
     public function secretPwUnwrap(
         string $paserk,
         HiddenString $password
-    ): AsymmetricSecretKey {
+    ): BaseAsymmetricSecretKey {
         $pieces = explode('.', $paserk);
         if (count($pieces) !== 3) {
             throw new PaserkException('Invalid wrapped key');
@@ -148,7 +152,7 @@ class PBKW
             $payload,
             $password
         );
-        if (!($unwrapped instanceof AsymmetricSecretKey)) {
+        if (!($unwrapped instanceof BaseAsymmetricSecretKey)) {
             throw new TypeError();
         }
         return $unwrapped;

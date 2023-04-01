@@ -9,7 +9,7 @@ use ParagonIE\Paserk\{
     Types\LocalWrap
 };
 use ParagonIE\Paseto\Exception\InvalidVersionException;
-use ParagonIE\Paseto\Keys\SymmetricKey;
+use ParagonIE\Paseto\Keys\Base\SymmetricKey;
 use ParagonIE\Paseto\Protocol\{
     Version3,
     Version4
