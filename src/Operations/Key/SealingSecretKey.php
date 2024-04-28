@@ -2,7 +2,14 @@
 declare(strict_types=1);
 namespace ParagonIE\Paserk\Operations\Key;
 
+use Mdanter\Ecc\EccFactory;
+use ParagonIE\ConstantTime\{
+    Base64UrlSafe,
+    Binary,
+    Hex
+};
 use ParagonIE\EasyECC\ECDSA\{
+    ConstantTimeMath,
     PublicKey,
     SecretKey
 };
@@ -55,6 +62,50 @@ class SealingSecretKey extends AsymmetricSecretKey
             ),
             $protocol
         );
+    }
+
+    /**
+     * @param string $encoded
+     * @param ProtocolInterface|null $version
+     * @return self
+     */
+    public static function fromEncodedString(string $encoded, ProtocolInterface $version = null): self
+    {
+        if (!$version) {
+            $version = new Version4();
+        }
+        if (hash_equals($version::header(), Version3::HEADER)) {
+            return static::fromEncodedStringV3($encoded, $version);
+        }
+        return static::fromEncodedStringV4($encoded, $version);
+    }
+
+    /**
+     * @param string $encoded
+     * @param Version3 $version
+     * @return self
+     */
+    public static function fromEncodedStringV3(string $encoded, Version3 $version): self
+    {
+        $decoded = Base64UrlSafe::decodeNoPadding($encoded);
+
+        if (Binary::safeStrlen($decoded) === 48) {
+            return new self(
+                (new SecretKey(
+                    new ConstantTimeMath(),
+                    EccFactory::getNistCurves()->generator384(null, true),
+                    gmp_init(Hex::encode($decoded), 16)
+                ))->exportPem()
+            );
+        }
+
+        return new static($decoded, $version);
+    }
+
+    public static function fromEncodedStringV4(string $encoded, Version4 $version): self
+    {
+        $decoded = Base64UrlSafe::decodeNoPadding($encoded);
+        return new static($decoded, $version);
     }
 
     /**
