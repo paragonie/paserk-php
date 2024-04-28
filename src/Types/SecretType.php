@@ -140,7 +140,7 @@ class SecretType implements PaserkTypeInterface
     {
         switch ($protocol::header()) {
             case 'v3':
-                if ($length > 47) {
+                if ($length >= 47) {
                     return;
                 }
                 break;

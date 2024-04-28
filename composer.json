@@ -24,7 +24,7 @@
     "ext-gmp": "*",
     "ext-json": "*",
     "ext-openssl": "*",
-    "paragonie/easy-ecc": "^1",
+    "paragonie/easy-ecc": "^1.1",
     "paragonie/hidden-string": "^1|^2",
     "paragonie/paseto": "^3.1"
   },
