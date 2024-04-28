@@ -122,12 +122,12 @@ class SealingSecretKey extends AsymmetricSecretKey
     }
 
     /**
-     * @return AsymmetricPublicKey
+     * @return SealingPublicKey
      *
      * @throws Exception
      * @throws TypeError
      */
-    public function getPublicKey(): AsymmetricPublicKey
+    public function getPublicKey(): SealingPublicKey
     {
         switch ($this->protocol::header()) {
             case Version3::HEADER:
