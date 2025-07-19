@@ -24,9 +24,9 @@
     "ext-gmp": "*",
     "ext-json": "*",
     "ext-openssl": "*",
-    "paragonie/easy-ecc": "^1.2",
+    "paragonie/easy-ecc": "^1.3",
     "paragonie/hidden-string": "^1|^2",
-    "paragonie/paseto": "^3.4"
+    "paragonie/paseto": "^3.5"
   },
   "require-dev": {
     "phpunit/phpunit": "^9|^10",
